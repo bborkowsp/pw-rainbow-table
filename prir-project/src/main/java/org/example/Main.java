@@ -1,17 +1,42 @@
 package org.example;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
-    public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+public class Main {
+
+    private static final String FILE_PATH = "src/main/resources/10-million-password-list-top-10000.txt";
+    private static final Integer CHAIN_LENGTH = 1000;
+
+
+    public static void main(String[] args) {
+        Des des = new Des();
+        byte[] cipher = new byte[0];
+        try {
+            cipher = des.cipherPassword("qwerty", "01234567");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
+        RainbowTable rainbowTable = new RainbowTable(CHAIN_LENGTH);
+        List<String> commonUsedPasswords = getCommonUsedPasswords();
+        commonUsedPasswords.forEach(rainbowTable::generateRainbowTable);
+        rainbowTable.crackKey(cipher);
+    }
+
+    private static List<String> getCommonUsedPasswords() {
+        List<String> commonUsedPasswords = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                commonUsedPasswords.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return commonUsedPasswords;
     }
 }
