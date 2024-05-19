@@ -10,7 +10,7 @@ import java.security.Security;
 
 public class Des {
 
-    byte[] cipherPassword(String password, String key) throws Exception {
+    public byte[] cipherPassword(String password, String key) throws Exception {
         Security.addProvider(new BouncyCastleProvider());
 
         byte[] desKey = key.getBytes();
