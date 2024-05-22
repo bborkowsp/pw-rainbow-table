@@ -15,6 +15,7 @@ public class RainbowTable {
     private final String[][] table;
     private final String plainText;
     private int currentChainRow = -1;
+    private static final Object lock = new Object();
 
     public RainbowTable(String plainText, int chainLength, int numberOfChains) {
         this.plainText = plainText;
@@ -50,10 +51,16 @@ public class RainbowTable {
         }
 
         LoggerUtil.logWithoutPrintingNewLine(" > END\n");
+        updateTable(startPassword, currentHash);
+    }
 
-        currentChainRow++;
-        table[currentChainRow][0] = startPassword;
-        table[currentChainRow][1] = new String(currentHash);
+    private void updateTable(String startPassword, byte[] currentHash) {
+        synchronized (lock) {
+            currentChainRow++;
+            System.out.println("Current chain row: " + currentChainRow);
+            table[currentChainRow][0] = startPassword;
+            table[currentChainRow][1] = new String(currentHash);
+        }
     }
 
     public void crackKey(byte[] cipher) {
@@ -62,8 +69,9 @@ public class RainbowTable {
 
         StringBuilder cipherChain = new StringBuilder(HashLoggerUtil.getHashSubstitute(currentHash));
 
-        for (int i = chainLength - 1; i >= 0; i--) {
+        for (int i = 0; i < chainLength; i++) {
             LoggerUtil.log("Searching for key in chains with hash " + HashLoggerUtil.getHashSubstitute(currentHash));
+
             for (String[] chain : table) {
                 LoggerUtil.log("Checking chain: " + chain[0] + " with final hash " + HashLoggerUtil.getHashSubstitute(chain[1]) + " with current hash " + HashLoggerUtil.getHashSubstitute(currentHash));
                 if (chain[1].equalsIgnoreCase(new String(currentHash))) {
@@ -71,7 +79,7 @@ public class RainbowTable {
                     String startPassword = chain[0];
                     currentKey = startPassword.getBytes();
 
-                    byte[] currentChainHash = new byte[0];
+                    byte[] currentChainHash;
 
                     for (int j = 0; j < chainLength + 1; j++) {
 
@@ -102,7 +110,7 @@ public class RainbowTable {
                 return;
             }
             cipherChain.append(" ----hash----> ").append(HashLoggerUtil.getHashSubstitute(currentHash));
-            LoggerUtil.log("Current deciphering chain: " + cipherChain.toString());
+            LoggerUtil.log("Current deciphering chain: " + cipherChain);
         }
         LoggerUtil.log("Key not found in the rainbow table chains");
     }

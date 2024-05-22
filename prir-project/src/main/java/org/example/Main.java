@@ -15,7 +15,7 @@ public class Main {
     private static final String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
     private static final Integer CHAIN_LENGTH = 2;
     private static final String KEY = "creampie";
-    private static final Boolean PARALLEL_MODE = false;
+    private static final Boolean PARALLEL_MODE = true;
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
 
@@ -50,7 +50,7 @@ public class Main {
 
 
     private static void runParallel(RainbowTable rainbowTable, List<String> commonlyUsedPasswords) {
-        ExecutorService executor = Executors.newFixedThreadPool(4);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
 
         for (String password : commonlyUsedPasswords) {
             executor.submit(() -> rainbowTable.generateChain(password));
