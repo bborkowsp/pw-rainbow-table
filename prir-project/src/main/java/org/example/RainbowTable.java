@@ -8,13 +8,15 @@ import lombok.Setter;
 public class RainbowTable {
     private static final int DES_KEY_LENGTH = 8;
     private final String[][] table;
+    private final String plainText;
     private final int chainLength;
     private final int numberOfChains;
     private int currentChainRow = -1;
     private Des des;
     private ReductionFunction reductionFunction;
 
-    public RainbowTable(int chainLength, int numberOfChains) {
+    public RainbowTable(String plainText, int chainLength, int numberOfChains) {
+        this.plainText = plainText;
         this.chainLength = chainLength;
         this.numberOfChains = numberOfChains;
 
@@ -24,26 +26,26 @@ public class RainbowTable {
     }
 
     public void generateChain(String startPassword) {
-        //System.out.println("Generating rainbow table for password: " + startPassword);
+        Main.log("Generating rainbow table for password: " + startPassword);
         startPassword = new String(adjustKeyLength(startPassword.getBytes()));
         byte[] currentKey = startPassword.getBytes();
         byte[] currentHash = new byte[0];
-        //System.out.print("START > " + new String(currentKey));
+        Main.logWithoutBreakingTheLine("START > " + new String(currentKey));
         for (int k = 0; k < chainLength; k++) {
             try {
-                currentHash = des.cipherPassword(Main.PLAIN_TEXT, new String(currentKey));
+                currentHash = des.cipherPassword(plainText, new String(currentKey));
             } catch (Exception e) {
                 e.printStackTrace();
                 return;
             }
 
-            //System.out.print(" ----hash----> " + new String(currentHash));
+            Main.logWithoutBreakingTheLine(" ----hash----> " + new String(currentHash));
             currentKey = reductionFunction.reduceHash(currentHash).getBytes();
             if (k < chainLength - 1) {
-                //System.out.print(" ----reduction----> " + new String(currentKey));
+                Main.logWithoutBreakingTheLine(" ----reduction----> " + new String(currentKey));
             }
         }
-        //System.out.print(" > END\n");
+        Main.logWithoutBreakingTheLine(" > END\n");
 
         currentChainRow++;
         table[currentChainRow][0] = startPassword;
@@ -55,17 +57,17 @@ public class RainbowTable {
         byte[] currentKey;
 
         for (int i = chainLength - 1; i >= 0; i--) {
-            //System.out.println("Searching for key in chains with hash " + new String(currentHash));
+            Main.log("Searching for key in chains with hash " + new String(currentHash));
             for (String[] entry : table) {
-                //System.out.println("Checking entry: " + entry[0] + " with final hash " + entry[1] + " with current hash " + new String(currentHash));
+                Main.log("Checking entry: " + entry[0] + " with final hash " + entry[1] + " with current hash " + new String(currentHash));
                 if (entry[1].equalsIgnoreCase(new String(currentHash))) {
-                    //System.out.println("Key found in entry beginning from password " + entry[0] + " with hash " + entry[1]);
+                    Main.log("Key found in entry beginning from password " + entry[0] + " with hash " + entry[1]);
                     String startPassword = entry[0];
                     currentKey = startPassword.getBytes();
 
-                    for (int j = 0; j < chainLength; j++) {
+                    for (int j = 0; j < chainLength + 1; j++) {
                         try {
-                            currentHash = des.cipherPassword(Main.PLAIN_TEXT, new String(currentKey));
+                            currentHash = des.cipherPassword(plainText, new String(currentKey));
                         } catch (Exception e) {
                             e.printStackTrace();
                             return;
@@ -76,28 +78,27 @@ public class RainbowTable {
                         }
                         currentKey = reductionFunction.reduceHash(currentHash).getBytes();
                     }
-                    return;
                 }
             }
-            //System.out.println("Key not found in the current chains");
+            Main.log("Key not found in the current chains");
             currentKey = reductionFunction.reduceHash(currentHash).getBytes();
-            //System.out.print(new String(currentHash) + " ----reduction----> " + new String(currentKey));
+            Main.logWithoutBreakingTheLine(new String(currentHash) + " ----reduction----> " + new String(currentKey));
 
             try {
-                currentHash = des.cipherPassword(Main.PLAIN_TEXT, new String(currentKey));
+                currentHash = des.cipherPassword(plainText, new String(currentKey));
             } catch (Exception e) {
                 e.printStackTrace();
                 return;
             }
-            //System.out.println(" ----hash----> " + new String(currentHash));
+            Main.log(" ----hash----> " + new String(currentHash));
         }
         System.out.println("\nKey not found in the rainbow table chains");
     }
 
     public void printTable() {
-        //System.out.println("Current table:");
+        Main.log("Current table:");
         for (String[] entry : table) {
-            //System.out.println(entry[0] + " -> " + entry[1]);
+            Main.log(entry[0] + " -> " + entry[1]);
         }
     }
 
