@@ -14,7 +14,7 @@ public class Main {
     private static final String FILE_PATH = "src/main/resources/test.txt";
     private static final String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
     private static final Integer CHAIN_LENGTH = 2;
-    private static final String KEY = "creampie";
+    private static final String KEY = "michelle";
     private static final Boolean PARALLEL_MODE = true;
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
@@ -25,7 +25,7 @@ public class Main {
         byte[] cipher = Des.getCipher(PLAIN_TEXT, KEY);
 
         LoggerUtil.log("Ciphered " + PLAIN_TEXT + " with key " + KEY + " is equal to " + HashLoggerUtil.getHashSubstitute(cipher));
-        LoggerUtil.log("Reduction function for the returned cipher is " + ReductionFunction.reduceHash(cipher));
+        LoggerUtil.log("Reduction function for the returned cipher is " + ReductionFunction.reduceHash(cipher, 1));
 
         LoggerUtil.log("Loading commonly used passwords...");
         List<String> commonlyUsedPasswords = FileReader.getCommonlyUsedPasswords(FILE_PATH);

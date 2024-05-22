@@ -5,9 +5,9 @@ public class ReductionFunction {
     private static final String CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
     private static final int KEY_LENGTH = 8;
 
-    public static String reduceHash(byte[] hash) {
+    public static String reduceHash(byte[] hash, int index) {
         int sum = calculateSumOfBytesInHash(hash);
-        return mapSumToCharset(sum);
+        return mapSumToCharset(sum * index);
     }
 
     private static String mapSumToCharset(int sum) {
