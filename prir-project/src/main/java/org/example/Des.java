@@ -1,6 +1,8 @@
 package org.example;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -10,7 +12,19 @@ import java.security.Security;
 
 public class Des {
 
-    public byte[] cipherPassword(String password, String key) throws Exception {
+    private static final Logger logger = LoggerFactory.getLogger(Des.class);
+
+    public static byte[] getCipher(String plaintext, String key) {
+        byte[] cipher = new byte[0];
+        try {
+            cipher = cipherPassword(plaintext, key);
+        } catch (Exception e) {
+            logger.error("Error while ciphering password", e);
+        }
+        return cipher;
+    }
+
+    public static byte[] cipherPassword(String password, String key) throws Exception {
         Security.addProvider(new BouncyCastleProvider());
 
         byte[] desKey = key.getBytes();
