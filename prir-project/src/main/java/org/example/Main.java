@@ -1,83 +1,53 @@
 package org.example;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+
 public class Main {
 
-    //    private static final String FILE_PATH = "src/main/resources/most-common-8-chars-passwords.txt";
     private static final String FILE_PATH = "src/main/resources/test.txt";
     private static final String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
     private static final Integer CHAIN_LENGTH = 2;
     private static final String KEY = "superman";
     private static final Boolean PARALLEL_MODE = false;
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+
 
     public static void main(String[] args) {
-        log("Starting...");
+        LoggerUtil.log("Starting...");
 
-        byte[] cipher = getCipher(KEY);
+        byte[] cipher = Des.getCipher(PLAIN_TEXT, KEY);
 
-        log("Ciphered " + PLAIN_TEXT + " with key " + KEY + " is equal to " + new String(cipher));
-        log("Reduction function for the returned cipher is " + new ReductionFunction().reduceHash(cipher));
+        LoggerUtil.log("Ciphered " + PLAIN_TEXT + " with key " + KEY + " is equal to " + new String(cipher));
+        LoggerUtil.log("Reduction function for the returned cipher is " + ReductionFunction.reduceHash(cipher));
 
-        log("Loading commonly used passwords...");
-        List<String> commonlyUsedPasswords = getCommonlyUsedPasswords();
-        log("Loaded " + commonlyUsedPasswords.size() + " passwords");
+        LoggerUtil.log("Loading commonly used passwords...");
+        List<String> commonlyUsedPasswords = FileReader.getCommonlyUsedPasswords(FILE_PATH);
+        LoggerUtil.log("Loaded " + commonlyUsedPasswords.size() + " passwords");
 
-        log("Initializing rainbow table structure...");
+        LoggerUtil.log("Initializing rainbow table structure...");
         RainbowTable rainbowTable = new RainbowTable(PLAIN_TEXT, CHAIN_LENGTH, commonlyUsedPasswords.size());
 
-        log("Generating chains...");
+        LoggerUtil.log("Generating chains...");
         if (PARALLEL_MODE) {
             runParallel(rainbowTable, commonlyUsedPasswords);
         } else {
             runSequential(rainbowTable, commonlyUsedPasswords);
         }
 
-        log("Chains have been generated!");
+        LoggerUtil.log("Chains have been generated!");
         rainbowTable.printTable();
 
-        log("Cracking...");
+        LoggerUtil.log("Cracking...");
         rainbowTable.crackKey(cipher);
     }
 
-    public static void log(String message) {
-        System.out.println(message);
-    }
-
-    public static void logWithoutBreakingTheLine(String message) {
-        System.out.print(message);
-    }
-
-    private static byte[] getCipher(String key) {
-        Des des = new Des();
-        byte[] cipher = new byte[0];
-        try {
-            cipher = des.cipherPassword(PLAIN_TEXT, key);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return cipher;
-    }
-
-    private static List<String> getCommonlyUsedPasswords() {
-        List<String> commonUsedPasswords = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                commonUsedPasswords.add(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return commonUsedPasswords;
-    }
 
     private static void runParallel(RainbowTable rainbowTable, List<String> commonlyUsedPasswords) {
         ExecutorService executor = Executors.newFixedThreadPool(4);
@@ -90,7 +60,7 @@ public class Main {
         try {
             executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error("Error while waiting for executor to finish", e);
         }
     }
 

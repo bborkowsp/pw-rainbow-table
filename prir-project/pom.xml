@@ -15,13 +15,16 @@
         <junit.version>5.10.2</junit.version>
         <mockito.version>5.12.0</mockito.version>
         <lombok.version>1.18.32</lombok.version>
+        <slf4j.version>2.0.13</slf4j.version>
+        <bouncycastle.version>1.78.1</bouncycastle.version>
+        <slf4j-provider.version>2.0.13</slf4j-provider.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.78.1</version>
+            <version>${bouncycastle.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -40,6 +43,17 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j-provider.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 </project>
