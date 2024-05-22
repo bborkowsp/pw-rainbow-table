@@ -2,13 +2,11 @@ package org.example;
 
 public class LoggerUtil {
 
-
-    public static void log(String message) {
+    public static void log(boolean logAlways, String message) {
+        if (!logAlways && !Main.DEBUG) {
+            return;
+        }
         System.out.println(message);
-    }
-
-    public static void logWithoutPrintingNewLine(String message) {
-        System.out.print(message);
     }
 
 }

@@ -26,7 +26,7 @@ public class RainbowTable {
     }
 
     public void generateChain(String startPassword) {
-        LoggerUtil.log("Generating rainbow table for password: " + startPassword);
+        LoggerUtil.log(false, "Generating rainbow table for password: " + startPassword);
 
         if (startPassword.length() != 8)
             startPassword = new String(adjustKeyLengthToEightBytes(startPassword.getBytes()));
@@ -34,7 +34,7 @@ public class RainbowTable {
         byte[] currentKey = startPassword.getBytes();
         byte[] currentHash = new byte[0];
         int currentReductionIndex;
-        LoggerUtil.logWithoutPrintingNewLine("START > " + new String(currentKey));
+        StringBuilder cipherChain = new StringBuilder("START > " + new String(currentKey));
 
         for (int i = 0; i < chainLength; i++) {
             try {
@@ -44,15 +44,16 @@ public class RainbowTable {
                 return;
             }
 
-            LoggerUtil.logWithoutPrintingNewLine(" ----hash----> " + HashLoggerUtil.getHashSubstitute(currentHash));
+            cipherChain.append(" ----hash----> ").append(HashLoggerUtil.getHashSubstitute(currentHash));
             currentReductionIndex = i + 1;
             currentKey = ReductionFunction.reduceHash(currentHash, currentReductionIndex).getBytes();
             if (i < chainLength - 1) {
-                LoggerUtil.logWithoutPrintingNewLine(" ----reduction " + currentReductionIndex + "----> " + new String(currentKey));
+                cipherChain.append(" ----reduction ").append(currentReductionIndex).append("----> ").append(new String(currentKey));
             }
         }
 
-        LoggerUtil.logWithoutPrintingNewLine(" > END\n");
+        cipherChain.append(" > END\n");
+        LoggerUtil.log(false, "Generated chain: " + cipherChain);
         updateTable(startPassword, currentHash);
     }
 
@@ -72,12 +73,12 @@ public class RainbowTable {
         StringBuilder cipherChain = new StringBuilder(HashLoggerUtil.getHashSubstitute(currentHash));
 
         for (int i = 0; i < chainLength; i++) {
-            LoggerUtil.log("Searching for key in chains with hash " + HashLoggerUtil.getHashSubstitute(currentHash));
+            LoggerUtil.log(false, "Searching for key in chains with hash " + HashLoggerUtil.getHashSubstitute(currentHash));
 
             for (String[] chain : table) {
-                LoggerUtil.log("Checking chain: " + chain[0] + " with final hash " + HashLoggerUtil.getHashSubstitute(chain[1]) + " with current hash " + HashLoggerUtil.getHashSubstitute(currentHash));
+                LoggerUtil.log(false, "Checking chain: " + chain[0] + " with final hash " + HashLoggerUtil.getHashSubstitute(chain[1]) + " with current hash " + HashLoggerUtil.getHashSubstitute(currentHash));
                 if (chain[1].equalsIgnoreCase(new String(currentHash))) {
-                    LoggerUtil.log("Key found in chain beginning from password " + chain[0] + " with hash " + HashLoggerUtil.getHashSubstitute(chain[1]));
+                    LoggerUtil.log(false, "Key found in chain beginning from password " + chain[0] + " with hash " + HashLoggerUtil.getHashSubstitute(chain[1]));
                     String startPassword = chain[0];
                     currentKey = startPassword.getBytes();
 
@@ -98,10 +99,10 @@ public class RainbowTable {
                         currentReductionIndex = j + 1;
                         currentKey = ReductionFunction.reduceHash(currentHash, currentReductionIndex).getBytes();
                     }
-                    LoggerUtil.log("Key found in chain but did not match the cipher... checking next chain");
+                    LoggerUtil.log(false, "Key found in chain but did not match the cipher... checking next chain");
                 }
             }
-            LoggerUtil.log("Key not found in the current chains");
+            LoggerUtil.log(false, "Key not found in the current chains");
             currentReductionIndex = chainLength - i - 1;
             currentKey = ReductionFunction.reduceHash(currentHash, currentReductionIndex).getBytes();
 
@@ -114,15 +115,15 @@ public class RainbowTable {
                 return;
             }
             cipherChain.append(" ----hash----> ").append(HashLoggerUtil.getHashSubstitute(currentHash));
-            LoggerUtil.log("Current deciphering chain: " + cipherChain);
+            LoggerUtil.log(false, "Current deciphering chain: " + cipherChain);
         }
         System.out.println("\nKey not found in the rainbow table chains");
     }
 
     public void printTable() {
-        LoggerUtil.log("Current table:");
+        LoggerUtil.log(false, "Current table:");
         for (String[] chain : table) {
-            LoggerUtil.log(chain[0] + " -> " + HashLoggerUtil.getHashSubstitute(chain[1]));
+            LoggerUtil.log(false, chain[0] + " -> " + HashLoggerUtil.getHashSubstitute(chain[1]));
         }
     }
 
