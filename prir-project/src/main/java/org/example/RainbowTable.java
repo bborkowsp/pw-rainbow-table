@@ -5,6 +5,10 @@ import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
+
 @Getter
 @Setter
 public class RainbowTable {
@@ -36,14 +40,14 @@ public class RainbowTable {
         if (startPassword.length() != 8)
             startPassword = new String(adjustKeyLengthToEightBytes(startPassword.getBytes()));
 
-        byte[] currentKey = startPassword.getBytes();
-        byte[] currentHash = new byte[0];
+        String currentKey = startPassword;
+        String currentHash = "";
         int indexOfReductionFunctionInChainSequence;
-        StringBuilder cipherChain = new StringBuilder("START > " + new String(currentKey));
+        StringBuilder cipherChain = new StringBuilder("START > " + currentKey);
 
         for (int i = 0; i < chainLength; i++) {
             try {
-                currentHash = des.cipherPassword(plainText, new String(currentKey));
+                currentHash = des.cipherPassword(plainText, currentKey);
             } catch (Exception e) {
                 logger.error("Error while ciphering password", e);
                 return;
@@ -51,9 +55,9 @@ public class RainbowTable {
 
             cipherChain.append(" ----hash----> ").append(HashLoggerUtil.getHashSubstitute(currentHash));
             indexOfReductionFunctionInChainSequence = i + 1;
-            currentKey = reductionFunction.reduceHash(currentHash, indexOfReductionFunctionInChainSequence).getBytes();
+            currentKey = reductionFunction.reduceHash(currentHash, indexOfReductionFunctionInChainSequence);
             if (i < chainLength - 1) {
-                cipherChain.append(" ----reduction ").append(indexOfReductionFunctionInChainSequence).append("----> ").append(new String(currentKey));
+                cipherChain.append(" ----reduction ").append(indexOfReductionFunctionInChainSequence).append("----> ").append(currentKey);
             }
         }
 
@@ -62,32 +66,62 @@ public class RainbowTable {
         updateTable(startPassword, currentHash);
     }
 
-    private void updateTable(String startPassword, byte[] currentHash) {
+    private void updateTable(String startPassword, String currentHash) {
         synchronized (lock) {
             currentChainRow++;
             table[currentChainRow][0] = startPassword;
-            table[currentChainRow][1] = new String(currentHash);
+            table[currentChainRow][1] = currentHash;
         }
     }
 
-    public void crackKeySequential(byte[] cipher) {
-        String returned = crackKey(cipher);
-        if (returned != null) {
-            System.out.println("\nKey cracked: " + returned);
-            return;
+    public void crackKeySequential(String cipher) {
+        for (int i = chainLength - 1; i >= 1; i--) {
+            String returned = crackKey(cipher, i);
+            if (returned != null) {
+                System.out.println("\nKey cracked: " + returned);
+                return;
+            }
         }
         System.out.println("\nKey not found in the rainbow table chains");
     }
 
-    public void crackKeyParallel(byte[] cipher) {
+    public void crackKeyParallel(String cipher) {
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        List<Callable<String>> tasks = new ArrayList<>();
 
+        for (int i = chainLength - 1; i >= 1; i--) {
+            final int index = i;
+            tasks.add(() -> crackKey(cipher, index));
+        }
+
+        try {
+            List<Future<String>> results = executor.invokeAll(tasks);
+            for (Future<String> result : results) {
+                try {
+                    String returned = result.get();
+                    if (returned != null) {
+                        System.out.println("\nKey cracked: " + returned);
+                        executor.shutdown();
+                        return;
+                    }
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            executor.shutdown();
+        }
+
+        System.out.println("\nKey not found in the rainbow table chains");
     }
 
-    private String crackKey(byte[] cipher) {
-        byte[] currentHash = cipher;
-        byte[] currentKey;
-        int currentReductionIndex = 1;
-        System.out.println("crackKey --- Current reduction index: " + currentReductionIndex);
+    private String crackKey(String cipher, int startReductionIndex) {
+        String currentHash = cipher;
+        String currentKey;
+        int currentReductionIndex = startReductionIndex;
+        System.out.println("-------------- Current reduction index: " + currentReductionIndex + "--------------");
 
         StringBuilder cipherChain = new StringBuilder(HashLoggerUtil.getHashSubstitute(currentHash));
 
@@ -96,47 +130,46 @@ public class RainbowTable {
 
             for (String[] chain : table) {
                 LoggerUtil.log(false, "Checking chain: " + chain[0] + " with final hash " + HashLoggerUtil.getHashSubstitute(chain[1]) + " with current hash " + HashLoggerUtil.getHashSubstitute(currentHash));
-                if (chain[1].equalsIgnoreCase(new String(currentHash))) {
+                if (chain[1].equals(currentHash)) {
                     LoggerUtil.log(false, "Key found in chain beginning from password " + chain[0] + " with hash " + HashLoggerUtil.getHashSubstitute(chain[1]));
                     String startPassword = chain[0];
-                    currentKey = startPassword.getBytes();
+                    currentKey = startPassword;
 
-                    byte[] currentChainHash;
+                    String currentChainHash;
                     int reductionIndex;
-                    StringBuilder currentCipherChain = new StringBuilder("START > " + new String(currentKey));
+                    StringBuilder currentCipherChain = new StringBuilder("START > " + currentKey);
 
                     for (int j = 0; j < chainLength; j++) {
                         try {
-                            currentChainHash = des.cipherPassword(plainText, new String(currentKey));
+                            currentChainHash = des.cipherPassword(plainText, currentKey);
                         } catch (Exception e) {
                             logger.error("Error while ciphering password", e);
                             return null;
                         }
                         currentCipherChain.append(" ----hash----> ").append(HashLoggerUtil.getHashSubstitute(currentChainHash));
-                        if (new String(currentChainHash).equals(new String(cipher))) {
+                        if (currentChainHash.equalsIgnoreCase(cipher)) {
                             LoggerUtil.log(false, "Key found in chain: " + currentCipherChain.toString());
-                            return new String(currentKey);
+                            return currentKey;
                         }
                         reductionIndex = j + 1;
-                        currentKey = reductionFunction.reduceHash(currentHash, reductionIndex).getBytes();
+                        currentKey = reductionFunction.reduceHash(currentHash, reductionIndex);
                         if (j < chainLength - 1) {
-                            currentCipherChain.append(" ----reduction ").append(reductionIndex).append("----> ").append(new String(currentKey));
+                            currentCipherChain.append(" ----reduction ").append(reductionIndex).append("----> ").append(currentKey);
                         }
                     }
                     LoggerUtil.log(false, "Key found in chain but did not match the cipher: " + currentCipherChain);
                 }
             }
             LoggerUtil.log(false, "Key not found in the current chains");
-            if (currentReductionIndex == chainLength + 1) {
+            if (currentReductionIndex >= chainLength ) {
                 break;
             }
-            currentKey = reductionFunction.reduceHash(currentHash, currentReductionIndex).getBytes();
+            currentKey = reductionFunction.reduceHash(currentHash, currentReductionIndex);
+            cipherChain.append(" ----reduction ").append(currentReductionIndex).append("----> ").append(currentKey);
             currentReductionIndex++;
 
-            cipherChain.append(" ----reduction ").append(currentReductionIndex).append("----> ").append(new String(currentKey));
-
             try {
-                currentHash = des.cipherPassword(plainText, new String(currentKey));
+                currentHash = des.cipherPassword(plainText, currentKey);
             } catch (Exception e) {
                 logger.error("Error while ciphering password", e);
                 return null;

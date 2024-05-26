@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -39,7 +38,7 @@ public class RainbowTableTest {
         String hashedValue = HASHED_VALUES[0];
         String beginningPassword = PASSWORDS[0];
         String finalPassword = PASSWORDS[1];
-        when(desMock.cipherPassword(anyString(), anyString())).thenReturn(hashedValue.getBytes());
+        when(desMock.cipherPassword(anyString(), anyString())).thenReturn(hashedValue);
         when(reductionFunctionMock.reduceHash(any(), anyInt())).thenReturn(finalPassword);
 
         // When
@@ -54,8 +53,8 @@ public class RainbowTableTest {
     public void givenRainbowTable_whenGenerateMultipleChains_thenLastRowCorrect() throws Exception {
         // Given
         for (int i = 0; i < PASSWORDS.length; i++) {
-            when(desMock.cipherPassword(PLAIN_TEXT, PASSWORDS[i])).thenReturn(HASHED_VALUES[i].getBytes());
-            when(reductionFunctionMock.reduceHash(eq(HASHED_VALUES[i].getBytes()), anyInt())).thenReturn(PASSWORDS[i]);
+            when(desMock.cipherPassword(PLAIN_TEXT, PASSWORDS[i])).thenReturn(HASHED_VALUES[i]);
+            when(reductionFunctionMock.reduceHash(eq(HASHED_VALUES[i]), anyInt())).thenReturn(PASSWORDS[i]);
         }
 
         // When
@@ -74,8 +73,8 @@ public class RainbowTableTest {
     void givenRainbowTable_whenCrackKey_thenKeyCrackedSuccessfully() throws Exception {
         // Given
         for (int i = 0; i < PASSWORDS.length; i++) {
-            when(desMock.cipherPassword(eq(PLAIN_TEXT), eq(PASSWORDS[i]))).thenReturn(HASHED_VALUES[i].getBytes());
-            when(reductionFunctionMock.reduceHash(eq(HASHED_VALUES[i].getBytes()), anyInt())).thenReturn(PASSWORDS[i]);
+            when(desMock.cipherPassword(eq(PLAIN_TEXT), eq(PASSWORDS[i]))).thenReturn(HASHED_VALUES[i]);
+            when(reductionFunctionMock.reduceHash(eq(HASHED_VALUES[i]), anyInt())).thenReturn(PASSWORDS[i]);
         }
 
         for (String password : PASSWORDS) {
@@ -86,7 +85,7 @@ public class RainbowTableTest {
         System.setOut(new PrintStream(outContent));
 
         // When
-        rainbowTable.crackKeySequential(HASHED_VALUES[0].getBytes());
+        rainbowTable.crackKeySequential(HASHED_VALUES[0]);
 
         // Then
         String output = outContent.toString();
@@ -99,10 +98,10 @@ public class RainbowTableTest {
     void givenRainbowTable_whenCrackKeyThatNotExists_thenKeyCrackingFailed() throws Exception {
         // Given
         for (int i = 0; i < PASSWORDS.length; i++) {
-            when(desMock.cipherPassword(eq(PLAIN_TEXT), eq(PASSWORDS[i]))).thenReturn(HASHED_VALUES[i].getBytes());
-            when(reductionFunctionMock.reduceHash(eq(HASHED_VALUES[i].getBytes()), anyInt())).thenReturn(PASSWORDS[i]);
+            when(desMock.cipherPassword(eq(PLAIN_TEXT), eq(PASSWORDS[i]))).thenReturn(HASHED_VALUES[i]);
+            when(reductionFunctionMock.reduceHash(eq(HASHED_VALUES[i]), anyInt())).thenReturn(PASSWORDS[i]);
         }
-        when(desMock.cipherPassword(eq(PLAIN_TEXT), anyString())).thenReturn("unknownHash".getBytes());
+        when(desMock.cipherPassword(eq(PLAIN_TEXT), anyString())).thenReturn("unknownHash");
         when(reductionFunctionMock.reduceHash(any(), anyInt())).thenReturn("unknown_");
 
         for (String password : PASSWORDS) {
@@ -113,13 +112,34 @@ public class RainbowTableTest {
         System.setOut(new PrintStream(outContent));
 
         // When
-        rainbowTable.crackKeySequential("keyThatDoesNotExist".getBytes());
+        rainbowTable.crackKeySequential("keyThatDoesNotExist");
 
         // Then
         String output = outContent.toString();
         assertTrue(output.contains("Key not found in the rainbow table chains"));
 
         outContent.reset();
+    }
+
+    @Test
+    void abc() throws Exception {
+        Des des1 = new Des();
+//        Des des2 = new Des();
+
+        String output1 = des1.cipherPassword(getPLAIN_TEXT(), "12345678");
+        String output2 = des1.cipherPassword(getPLAIN_TEXT(), "12345678");
+
+        assertEquals(output1, output2);
+    }
+
+    @Test
+    void abc2() throws Exception {
+        String hash = "asasdasdasd";
+
+        String reduced1 = new ReductionFunction().reduceHash(hash, 1);
+        String reduced2 = new ReductionFunction().reduceHash(hash, 1);
+
+        assertEquals(reduced1, reduced2);
     }
 
 }

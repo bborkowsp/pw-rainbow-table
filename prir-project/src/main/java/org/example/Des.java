@@ -8,14 +8,21 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.Security;
+import java.util.Arrays;
+import java.util.Base64;
 
 public class Des {
 
     private static final Logger logger = LoggerFactory.getLogger(Des.class);
 
-    public byte[] getCipher(String plaintext, String key) {
-        byte[] cipher = new byte[0];
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
+    public String getCipher(String plaintext, String key) {
+        String cipher = null;
         try {
             cipher = cipherPassword(plaintext, key);
         } catch (Exception e) {
@@ -24,9 +31,7 @@ public class Des {
         return cipher;
     }
 
-    public byte[] cipherPassword(String password, String key) throws Exception {
-        Security.addProvider(new BouncyCastleProvider());
-
+    public String cipherPassword(String password, String key) throws Exception {
         byte[] desKey = key.getBytes();
 
         DESKeySpec desKeySpec = new DESKeySpec(desKey);
@@ -38,6 +43,9 @@ public class Des {
 
         byte[] plaintext = password.getBytes();
 
-        return cipher.doFinal(plaintext);
+        byte[] out = cipher.doFinal(plaintext);
+//        System.out.println("Password: " + password + " Key: " + key + "  output: " + out);
+        return Base64.getEncoder().encodeToString(out);
     }
+
 }

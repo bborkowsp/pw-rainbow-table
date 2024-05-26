@@ -14,8 +14,8 @@ public class Main {
 
     private static final String FILE_PATH = "src/main/resources/test.txt";
     public static final String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
-    public static Integer CHAIN_LENGTH;
-    private static final String KEY = "punisher";
+    public static Integer CHAIN_LENGTH = 3;
+    private static final String KEY = "11111111";
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     private static Boolean PARALLEL_MODE = true;
@@ -29,9 +29,11 @@ public class Main {
 
         LoggerUtil.log(true, "Starting...");
 
+        Long generatingStartTime = null, generatingEndTime = null;
+        Long crackingStartTime, crackingEndTime;
         Des des = new Des();
         ReductionFunction reductionFunction = new ReductionFunction();
-        byte[] cipher = des.getCipher(PLAIN_TEXT, KEY);
+        String cipher = des.getCipher(PLAIN_TEXT, KEY);
 
         LoggerUtil.log(false, "Ciphered " + PLAIN_TEXT + " with key " + KEY + " is equal to " + HashLoggerUtil.getHashSubstitute(cipher));
         LoggerUtil.log(false, "Reduction function for the returned cipher is " + reductionFunction.reduceHash(cipher, 1));
@@ -51,11 +53,13 @@ public class Main {
             rainbowTable = new RainbowTable(PLAIN_TEXT, CHAIN_LENGTH, commonlyUsedPasswords.size(), des, reductionFunction);
 
             LoggerUtil.log(true, "Generating chains in " + (PARALLEL_MODE ? "parallel" : "sequential") + " mode...");
+            generatingStartTime = System.currentTimeMillis();
             if (PARALLEL_MODE) {
                 runParallel(rainbowTable, commonlyUsedPasswords);
             } else {
                 runSequential(rainbowTable, commonlyUsedPasswords);
             }
+            generatingEndTime = System.currentTimeMillis();
 
             LoggerUtil.log(true, "Chains have been generated!");
 
@@ -69,11 +73,20 @@ public class Main {
         rainbowTable.printTable();
 
         LoggerUtil.log(true, "Cracking...");
+        crackingStartTime = System.currentTimeMillis();
         if (PARALLEL_MODE) {
             rainbowTable.crackKeyParallel(cipher);
         } else {
             rainbowTable.crackKeySequential(cipher);
         }
+        crackingEndTime = System.currentTimeMillis();
+
+        if (generatingStartTime != null) {
+            LoggerUtil.log(true, "\nGenerating has been completed in " + (generatingEndTime - generatingStartTime) + " ms");
+        } else {
+            LoggerUtil.log(true, "");
+        }
+        LoggerUtil.log(true, "Cracking has been completed in " + (crackingEndTime - crackingStartTime) + " ms");
     }
 
     public static void parseArguments(String[] args) {
