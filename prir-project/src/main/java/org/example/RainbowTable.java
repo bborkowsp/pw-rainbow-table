@@ -83,7 +83,7 @@ public class RainbowTable {
     }
 
     public void crackKeyParallel(byte[] cipher) {
-        crackKeySequential(cipher); // TODO
+
     }
 
     private String crackKey(byte[] cipher, int startReductionIndex) {

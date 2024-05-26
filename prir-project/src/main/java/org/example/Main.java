@@ -14,7 +14,7 @@ public class Main {
 
     private static final String FILE_PATH = "src/main/resources/test.txt";
     public static final String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
-    public static Integer CHAIN_LENGTH = 10;
+    public static Integer CHAIN_LENGTH;
     private static final String KEY = "michelle";
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
@@ -66,9 +66,6 @@ public class Main {
             }
         }
 
-        if (rainbowTable == null) {
-            throw new RuntimeException("Rainbow table is unexpectedly null, an unknown error must have occurred.");
-        }
         rainbowTable.printTable();
 
         LoggerUtil.log(true, "Cracking...");
@@ -84,7 +81,7 @@ public class Main {
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd;
-        boolean debug, sequential, parallel, input, output;
+        boolean debug, sequential, parallel, input, output, chainLength;
 
         try {
             cmd = parser.parse(options, args);
@@ -110,8 +107,15 @@ public class Main {
                 throw new ParseException("Cannot provide both input and output file paths. Please choose one.");
             }
 
+            chainLength = cmd.hasOption("c");
+            if (output && !chainLength) {
+                throw new ParseException("You need to provide chain length when using -o option");
+            }
+
             if (input) INPUT_FILE_PATH = cmd.getOptionValue("i");
             if (output) OUTPUT_FILE_PATH = cmd.getOptionValue("o");
+            if (chainLength) CHAIN_LENGTH = Integer.parseInt(cmd.getOptionValue("c"));
+
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             formatter.printHelp("main application", options);
@@ -134,6 +138,10 @@ public class Main {
         outputOption.setRequired(false);
         options.addOption(outputOption);
 
+        Option chainLengthOption = new Option("c", "chain-length", true, "chain length required for -o option");
+        chainLengthOption.setRequired(false);
+        options.addOption(chainLengthOption);
+
         return options;
     }
 
@@ -146,9 +154,13 @@ public class Main {
 
         executor.shutdown();
         try {
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            if (!executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+                logger.error("Timeout occurred while waiting for executor to finish");
+                executor.shutdownNow();
+            }
         } catch (InterruptedException e) {
             logger.error("Error while waiting for executor to finish", e);
+            executor.shutdownNow();
         }
     }
 
