@@ -12,7 +12,7 @@ public class RainbowTable {
     private static final int DES_KEY_LENGTH = 8;
     private final int chainLength;
     private final int numberOfChains;
-    private final String[][] table;
+    private String[][] table;
     private final String plainText;
     private int currentChainRow = -1;
     private static final Object lock = new Object();
@@ -134,5 +134,6 @@ public class RainbowTable {
         }
         return adjustedKey;
     }
+
 
 }

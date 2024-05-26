@@ -1,5 +1,6 @@
 package org.example;
 
+import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,15 +9,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.cli.*;
-
 
 public class Main {
 
     private static final String FILE_PATH = "src/main/resources/test.txt";
-    private static final String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
-    private static final Integer CHAIN_LENGTH = 2;
-    private static final String KEY = "michelle";
+    static final String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
+    static final Integer CHAIN_LENGTH = 2;
+    private static final String KEY = "thompson";
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     private static Boolean PARALLEL_MODE = true;
@@ -68,7 +67,6 @@ public class Main {
         if (rainbowTable == null) {
             throw new RuntimeException("Rainbow table is unexpectedly null, an unknown error must have occurred.");
         }
-
         rainbowTable.printTable();
 
         LoggerUtil.log(true, "Cracking...");
@@ -121,11 +119,11 @@ public class Main {
         options.addOption("s", "sequential", false, "sequential mode");
         options.addOption("p", "parallel", false, "parallel mode");
 
-        Option inputOption = new Option("i", "input", true, "input path to load the rainbow tables");
+        Option inputOption = new Option("i", "input", true, "input path to load the rainbow table");
         inputOption.setRequired(false);
         options.addOption(inputOption);
 
-        Option outputOption = new Option("o", "output", true, "output path to store the rainbow tables");
+        Option outputOption = new Option("o", "output", true, "output path to store the rainbow table");
         outputOption.setRequired(false);
         options.addOption(outputOption);
 
