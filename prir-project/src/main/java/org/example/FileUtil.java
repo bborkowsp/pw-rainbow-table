@@ -19,6 +19,9 @@ public class FileUtil {
             BufferedReader reader = new BufferedReader(new FileReader(filePath));
             StringBuilder content = new StringBuilder();
             String line;
+            line = reader.readLine();
+            Main.CHAIN_LENGTH = Integer.parseInt(line);
+
             while ((line = reader.readLine()) != null) {
                 content.append(line).append(System.lineSeparator());
             }
@@ -54,6 +57,8 @@ public class FileUtil {
     public static void saveRainbowTable(String filePath, RainbowTable rainbowTable) {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
+            writer.write(Main.CHAIN_LENGTH.toString());
+            writer.newLine();
             for (String[] row : rainbowTable.getTable()) {
                 writer.write(row[0] + " " + row[1]);
                 writer.write("$$$END_OF_HASH$$$");

@@ -14,7 +14,7 @@ public class Main {
 
     private static final String FILE_PATH = "src/main/resources/test.txt";
     public static final String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
-    static final Integer CHAIN_LENGTH = 10;
+    static Integer CHAIN_LENGTH;
     private static final String KEY = "michelle";
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
@@ -80,7 +80,7 @@ public class Main {
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd;
-        boolean debug, sequential, parallel, input, output;
+        boolean debug, sequential, parallel, input, output, chainLength;
 
         try {
             cmd = parser.parse(options, args);
@@ -106,8 +106,14 @@ public class Main {
                 throw new ParseException("Cannot provide both input and output file paths. Please choose one.");
             }
 
+            chainLength = cmd.hasOption("c");
+            if (output && !chainLength) {
+                throw new ParseException("You need to provide chain length when using -o option");
+            }
+
             if (input) INPUT_FILE_PATH = cmd.getOptionValue("i");
             if (output) OUTPUT_FILE_PATH = cmd.getOptionValue("o");
+            if (chainLength) CHAIN_LENGTH = Integer.parseInt(cmd.getOptionValue("c"));
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             formatter.printHelp("main application", options);
@@ -129,6 +135,10 @@ public class Main {
         Option outputOption = new Option("o", "output", true, "output path to store the rainbow table");
         outputOption.setRequired(false);
         options.addOption(outputOption);
+
+        Option chainLengthOption = new Option("c", "chain-length", true, "chain length required for -o option");
+        chainLengthOption.setRequired(false);
+        options.addOption(chainLengthOption);
 
         return options;
     }
