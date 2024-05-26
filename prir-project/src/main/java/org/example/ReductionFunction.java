@@ -6,7 +6,6 @@ public class ReductionFunction {
     private static final int KEY_LENGTH = 8;
 
     public String reduceHash(String hash, int index) {
-        System.out.println("Current index " + index);
         return mapHashToCharset(hash, index);
     }
 
@@ -19,6 +18,7 @@ public class ReductionFunction {
             int charsetIndex = (CHARSET.indexOf(hashChar) + index + i) % CHARSET.length();
             reducedKey.append(CHARSET.charAt(charsetIndex));
         }
+
         return reducedKey.toString();
     }
 }

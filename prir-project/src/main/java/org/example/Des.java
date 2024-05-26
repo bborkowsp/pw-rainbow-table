@@ -8,9 +8,7 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.security.Security;
-import java.util.Arrays;
 import java.util.Base64;
 
 public class Des {
@@ -42,10 +40,9 @@ public class Des {
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 
         byte[] plaintext = password.getBytes();
+        byte[] output = cipher.doFinal(plaintext);
 
-        byte[] out = cipher.doFinal(plaintext);
-//        System.out.println("Password: " + password + " Key: " + key + "  output: " + out);
-        return Base64.getEncoder().encodeToString(out);
+        return Base64.getEncoder().encodeToString(output);
     }
 
 }

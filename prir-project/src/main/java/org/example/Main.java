@@ -13,12 +13,14 @@ import java.util.concurrent.TimeUnit;
 public class Main {
 
     private static final String FILE_PATH = "src/main/resources/test.txt";
-    public static final String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
-    public static Integer CHAIN_LENGTH = 3;
-    private static final String KEY = "11111111";
+    public static String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
+    public static Integer CHAIN_LENGTH = 100;
+    private static String KEY = "password";
+    private static String CIPHER_TO_CRACK = null;
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     private static Boolean PARALLEL_MODE = true;
+    private static final Boolean RUN_CRACKING_ONLY_IN_SEQUENTIAL_MODE = true;
     private static String INPUT_FILE_PATH;
     private static String OUTPUT_FILE_PATH;
     public static Boolean DEBUG = false;
@@ -29,11 +31,21 @@ public class Main {
 
         LoggerUtil.log(true, "Starting...");
 
+        boolean generateInParallelMode = PARALLEL_MODE;
+        boolean crackInParallelMode = PARALLEL_MODE && !RUN_CRACKING_ONLY_IN_SEQUENTIAL_MODE;
+
         Long generatingStartTime = null, generatingEndTime = null;
-        Long crackingStartTime, crackingEndTime;
+        long crackingStartTime, crackingEndTime;
         Des des = new Des();
         ReductionFunction reductionFunction = new ReductionFunction();
-        String cipher = des.getCipher(PLAIN_TEXT, KEY);
+        String cipher;
+        if (CIPHER_TO_CRACK == null) {
+            cipher = des.getCipher(PLAIN_TEXT, KEY);
+            LoggerUtil.log(true, "Using key \"" + KEY + "\" and plain text \"" + PLAIN_TEXT + "\" to test the rainbow table");
+        } else {
+            cipher = CIPHER_TO_CRACK;
+            LoggerUtil.log(true, "Using cipher \"" + CIPHER_TO_CRACK + "\" to test the rainbow table");
+        }
 
         LoggerUtil.log(false, "Ciphered " + PLAIN_TEXT + " with key " + KEY + " is equal to " + HashLoggerUtil.getHashSubstitute(cipher));
         LoggerUtil.log(false, "Reduction function for the returned cipher is " + reductionFunction.reduceHash(cipher, 1));
@@ -54,7 +66,7 @@ public class Main {
 
             LoggerUtil.log(true, "Generating chains in " + (PARALLEL_MODE ? "parallel" : "sequential") + " mode...");
             generatingStartTime = System.currentTimeMillis();
-            if (PARALLEL_MODE) {
+            if (generateInParallelMode) {
                 runParallel(rainbowTable, commonlyUsedPasswords);
             } else {
                 runSequential(rainbowTable, commonlyUsedPasswords);
@@ -74,7 +86,7 @@ public class Main {
 
         LoggerUtil.log(true, "Cracking...");
         crackingStartTime = System.currentTimeMillis();
-        if (PARALLEL_MODE) {
+        if (crackInParallelMode) {
             rainbowTable.crackKeyParallel(cipher);
         } else {
             rainbowTable.crackKeySequential(cipher);
@@ -82,11 +94,11 @@ public class Main {
         crackingEndTime = System.currentTimeMillis();
 
         if (generatingStartTime != null) {
-            LoggerUtil.log(true, "\nGenerating has been completed in " + (generatingEndTime - generatingStartTime) + " ms");
+            LoggerUtil.log(true, "\nGenerating has been completed in " + (generateInParallelMode ? "parallel" : "sequential") + " mode in " +  (generatingEndTime - generatingStartTime) + " ms");
         } else {
             LoggerUtil.log(true, "");
         }
-        LoggerUtil.log(true, "Cracking has been completed in " + (crackingEndTime - crackingStartTime) + " ms");
+        LoggerUtil.log(true, "Cracking has been completed in " + (crackInParallelMode ? "parallel" : "sequential") + " mode in " + (crackingEndTime - crackingStartTime) + " ms");
     }
 
     public static void parseArguments(String[] args) {
@@ -94,7 +106,7 @@ public class Main {
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd;
-        boolean debug, sequential, parallel, input, output, chainLength;
+        boolean debug, sequential, parallel, input, output, chainLength, key, text, cipher;
 
         try {
             cmd = parser.parse(options, args);
@@ -129,6 +141,24 @@ public class Main {
             if (output) OUTPUT_FILE_PATH = cmd.getOptionValue("o");
             if (chainLength) CHAIN_LENGTH = Integer.parseInt(cmd.getOptionValue("c"));
 
+            key = cmd.hasOption("k");
+            text = cmd.hasOption("t");
+            cipher = cmd.hasOption("cipher");
+
+            if ((key || text) && cipher) {
+                throw new ParseException("Cannot provide both key (or text) and cipher to crack. Please choose one.");
+            }
+
+            if (key) {
+                KEY = cmd.getOptionValue("k");
+                if (KEY.length() != 8) {
+                    throw new ParseException("Key must be 8 characters long");
+                }
+            }
+            if (text) PLAIN_TEXT = cmd.getOptionValue("t");
+            if (cipher) CIPHER_TO_CRACK = cmd.getOptionValue("cipher");
+
+
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             formatter.printHelp("main application", options);
@@ -147,13 +177,25 @@ public class Main {
         inputOption.setRequired(false);
         options.addOption(inputOption);
 
-        Option outputOption = new Option("o", "output", true, "output path to store the rainbow table");
+        Option outputOption = new Option("o", "output", true, "output path to store the rainbow table (requires -c option)");
         outputOption.setRequired(false);
         options.addOption(outputOption);
 
-        Option chainLengthOption = new Option("c", "chain-length", true, "chain length required for -o option");
+        Option chainLengthOption = new Option("c", "chain-length", true, "chain length required for -o option, default is " + CHAIN_LENGTH);
         chainLengthOption.setRequired(false);
         options.addOption(chainLengthOption);
+
+        Option keyOption = new Option("k", "key", true, "key used to test the rainbow table, default is \"" + KEY + "\"");
+        keyOption.setRequired(false);
+        options.addOption(keyOption);
+
+        Option cipherOption = new Option("cipher", true, "cipher used to test the rainbow table, by default a key is used instead");
+        cipherOption.setRequired(false);
+        options.addOption(cipherOption);
+
+        Option textOption = new Option("t", "text", true, "plain text to cipher, default is \"" + PLAIN_TEXT + "\"");
+        textOption.setRequired(false);
+        options.addOption(textOption);
 
         return options;
     }

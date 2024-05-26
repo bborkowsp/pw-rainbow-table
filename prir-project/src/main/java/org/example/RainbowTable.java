@@ -78,11 +78,11 @@ public class RainbowTable {
         for (int i = chainLength - 1; i >= 1; i--) {
             String returned = crackKey(cipher, i);
             if (returned != null) {
-                System.out.println("\nKey cracked: " + returned);
+                LoggerUtil.log(true, "\nKey cracked: " + returned);
                 return;
             }
         }
-        System.out.println("\nKey not found in the rainbow table chains");
+        LoggerUtil.log(true, "\nKey not found in the rainbow table chains");
     }
 
     public void crackKeyParallel(String cipher) {
@@ -100,7 +100,7 @@ public class RainbowTable {
                 try {
                     String returned = result.get();
                     if (returned != null) {
-                        System.out.println("\nKey cracked: " + returned);
+                        LoggerUtil.log(true, "\nKey cracked: " + returned);
                         executor.shutdown();
                         return;
                     }
@@ -114,14 +114,14 @@ public class RainbowTable {
             executor.shutdown();
         }
 
-        System.out.println("\nKey not found in the rainbow table chains");
+        LoggerUtil.log(true, "\nKey not found in the rainbow table chains");
     }
 
     private String crackKey(String cipher, int startReductionIndex) {
         String currentHash = cipher;
         String currentKey;
         int currentReductionIndex = startReductionIndex;
-        System.out.println("-------------- Current reduction index: " + currentReductionIndex + "--------------");
+        LoggerUtil.log(false, "-------------- Current reduction index: " + currentReductionIndex + "--------------");
 
         StringBuilder cipherChain = new StringBuilder(HashLoggerUtil.getHashSubstitute(currentHash));
 
@@ -152,7 +152,7 @@ public class RainbowTable {
                             return currentKey;
                         }
                         reductionIndex = j + 1;
-                        currentKey = reductionFunction.reduceHash(currentHash, reductionIndex);
+                        currentKey = reductionFunction.reduceHash(currentChainHash, reductionIndex);
                         if (j < chainLength - 1) {
                             currentCipherChain.append(" ----reduction ").append(reductionIndex).append("----> ").append(currentKey);
                         }
@@ -161,7 +161,7 @@ public class RainbowTable {
                 }
             }
             LoggerUtil.log(false, "Key not found in the current chains");
-            if (currentReductionIndex >= chainLength ) {
+            if (currentReductionIndex >= chainLength) {
                 break;
             }
             currentKey = reductionFunction.reduceHash(currentHash, currentReductionIndex);
