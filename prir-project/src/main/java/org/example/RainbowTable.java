@@ -38,7 +38,7 @@ public class RainbowTable {
 
         byte[] currentKey = startPassword.getBytes();
         byte[] currentHash = new byte[0];
-        int currentReductionIndex;
+        int indexOfReductionFunctionInChainSequence;
         StringBuilder cipherChain = new StringBuilder("START > " + new String(currentKey));
 
         for (int i = 0; i < chainLength; i++) {
@@ -50,10 +50,10 @@ public class RainbowTable {
             }
 
             cipherChain.append(" ----hash----> ").append(HashLoggerUtil.getHashSubstitute(currentHash));
-            currentReductionIndex = i + 1;
-            currentKey = reductionFunction.reduceHash(currentHash, currentReductionIndex).getBytes();
+            indexOfReductionFunctionInChainSequence = i + 1;
+            currentKey = reductionFunction.reduceHash(currentHash, indexOfReductionFunctionInChainSequence).getBytes();
             if (i < chainLength - 1) {
-                cipherChain.append(" ----reduction ").append(currentReductionIndex).append("----> ").append(new String(currentKey));
+                cipherChain.append(" ----reduction ").append(indexOfReductionFunctionInChainSequence).append("----> ").append(new String(currentKey));
             }
         }
 
@@ -71,13 +71,10 @@ public class RainbowTable {
     }
 
     public void crackKeySequential(byte[] cipher) {
-        for (int i = chainLength - (chainLength > 1 ? 2 : 1); i >= 0; i--) {
-            LoggerUtil.log(false, "========================================= Cracking with reduction function starting from " + (i + 1) + " =========================================");
-            String returned = crackKey(cipher, i);
-            if (returned != null) {
-                System.out.println("\nKey cracked: " + returned);
-                return;
-            }
+        String returned = crackKey(cipher);
+        if (returned != null) {
+            System.out.println("\nKey cracked: " + returned);
+            return;
         }
         System.out.println("\nKey not found in the rainbow table chains");
     }
@@ -86,10 +83,11 @@ public class RainbowTable {
 
     }
 
-    private String crackKey(byte[] cipher, int startReductionIndex) {
+    private String crackKey(byte[] cipher) {
         byte[] currentHash = cipher;
         byte[] currentKey;
-        int currentReductionIndex = startReductionIndex;
+        int currentReductionIndex = 1;
+        System.out.println("crackKey --- Current reduction index: " + currentReductionIndex);
 
         StringBuilder cipherChain = new StringBuilder(HashLoggerUtil.getHashSubstitute(currentHash));
 
@@ -104,7 +102,7 @@ public class RainbowTable {
                     currentKey = startPassword.getBytes();
 
                     byte[] currentChainHash;
-                    int reductionIndex = 0;
+                    int reductionIndex;
                     StringBuilder currentCipherChain = new StringBuilder("START > " + new String(currentKey));
 
                     for (int j = 0; j < chainLength; j++) {
@@ -119,21 +117,21 @@ public class RainbowTable {
                             LoggerUtil.log(false, "Key found in chain: " + currentCipherChain.toString());
                             return new String(currentKey);
                         }
-                        reductionIndex++;
+                        reductionIndex = j + 1;
                         currentKey = reductionFunction.reduceHash(currentHash, reductionIndex).getBytes();
                         if (j < chainLength - 1) {
                             currentCipherChain.append(" ----reduction ").append(reductionIndex).append("----> ").append(new String(currentKey));
                         }
                     }
-                    LoggerUtil.log(false, "Key found in chain but did not match the cipher: " + currentCipherChain.toString());
+                    LoggerUtil.log(false, "Key found in chain but did not match the cipher: " + currentCipherChain);
                 }
             }
             LoggerUtil.log(false, "Key not found in the current chains");
-            currentReductionIndex++;
-            if (currentReductionIndex > chainLength - 1) {
+            if (currentReductionIndex == chainLength + 1) {
                 break;
             }
             currentKey = reductionFunction.reduceHash(currentHash, currentReductionIndex).getBytes();
+            currentReductionIndex++;
 
             cipherChain.append(" ----reduction ").append(currentReductionIndex).append("----> ").append(new String(currentKey));
 
