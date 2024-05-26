@@ -14,8 +14,8 @@ public class Main {
 
     private static final String FILE_PATH = "src/main/resources/test.txt";
     public static final String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
-    static final Integer CHAIN_LENGTH = 10;
-    private static final String KEY = "michelle";
+    static final Integer CHAIN_LENGTH = 3;
+    private static final String KEY = "11111111";
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     private static Boolean PARALLEL_MODE = true;
@@ -72,7 +72,11 @@ public class Main {
         rainbowTable.printTable();
 
         LoggerUtil.log(true, "Cracking...");
-        rainbowTable.crackKey(cipher);
+        if (PARALLEL_MODE) {
+            rainbowTable.crackKeyParallel(cipher);
+        } else {
+            rainbowTable.crackKeySequential(cipher);
+        }
     }
 
     public static void parseArguments(String[] args) {

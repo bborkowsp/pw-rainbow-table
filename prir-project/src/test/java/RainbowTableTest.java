@@ -86,7 +86,7 @@ public class RainbowTableTest {
         System.setOut(new PrintStream(outContent));
 
         // When
-        rainbowTable.crackKey(HASHED_VALUES[0].getBytes());
+        rainbowTable.crackKeySequential(HASHED_VALUES[0].getBytes());
 
         // Then
         String output = outContent.toString();
@@ -113,7 +113,7 @@ public class RainbowTableTest {
         System.setOut(new PrintStream(outContent));
 
         // When
-        rainbowTable.crackKey("keyThatDoesNotExist".getBytes());
+        rainbowTable.crackKeySequential("keyThatDoesNotExist".getBytes());
 
         // Then
         String output = outContent.toString();
