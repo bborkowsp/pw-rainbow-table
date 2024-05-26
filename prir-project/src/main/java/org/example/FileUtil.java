@@ -38,7 +38,10 @@ public class FileUtil {
             throw new RuntimeException(e);
         }
 
-        RainbowTable rainbowTable = new RainbowTable(Main.PLAIN_TEXT, Main.CHAIN_LENGTH, table.size());
+        Des des = new Des();
+        ReductionFunction reductionFunction = new ReductionFunction();
+
+        RainbowTable rainbowTable = new RainbowTable(Main.PLAIN_TEXT, Main.CHAIN_LENGTH, table.size(), des, reductionFunction);
         String[][] tableArray = new String[table.size()][2];
         for (int i = 0; i < table.size(); i++) {
             tableArray[i] = table.get(i);

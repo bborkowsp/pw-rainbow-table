@@ -5,12 +5,12 @@ public class ReductionFunction {
     private static final String CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
     private static final int KEY_LENGTH = 8;
 
-    public static String reduceHash(byte[] hash, int index) {
+    public String reduceHash(byte[] hash, int index) {
         int sum = calculateSumOfBytesInHash(hash);
-        return mapSumToCharset(sum * index);
+        return mapSumToCharset(sum);
     }
 
-    private static String mapSumToCharset(int sum) {
+    private String mapSumToCharset(int sum) {
         StringBuilder reducedKey = new StringBuilder(KEY_LENGTH);
 
         for (int i = 0; i < KEY_LENGTH; i++) {
@@ -20,7 +20,7 @@ public class ReductionFunction {
         return reducedKey.toString();
     }
 
-    private static int calculateSumOfBytesInHash(byte[] hash) {
+    private int calculateSumOfBytesInHash(byte[] hash) {
         int sum = 0;
         for (byte b : hash) {
             sum += b & 0xFF;

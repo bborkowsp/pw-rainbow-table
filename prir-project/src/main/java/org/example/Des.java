@@ -14,7 +14,7 @@ public class Des {
 
     private static final Logger logger = LoggerFactory.getLogger(Des.class);
 
-    public static byte[] getCipher(String plaintext, String key) {
+    public byte[] getCipher(String plaintext, String key) {
         byte[] cipher = new byte[0];
         try {
             cipher = cipherPassword(plaintext, key);
@@ -24,7 +24,7 @@ public class Des {
         return cipher;
     }
 
-    public static byte[] cipherPassword(String password, String key) throws Exception {
+    public byte[] cipherPassword(String password, String key) throws Exception {
         Security.addProvider(new BouncyCastleProvider());
 
         byte[] desKey = key.getBytes();
