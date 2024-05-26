@@ -17,10 +17,15 @@ public class RainbowTable {
     private int currentChainRow = -1;
     private static final Object lock = new Object();
 
-    public RainbowTable(String plainText, int chainLength, int numberOfChains) {
+    private final Des des;
+    private final ReductionFunction reductionFunction;
+
+    public RainbowTable(String plainText, int chainLength, int numberOfChains, Des des, ReductionFunction reductionFunction) {
         this.plainText = plainText;
         this.chainLength = chainLength;
         this.numberOfChains = numberOfChains;
+        this.des = des;
+        this.reductionFunction = reductionFunction;
 
         table = new String[numberOfChains][2];
     }
@@ -38,7 +43,7 @@ public class RainbowTable {
 
         for (int i = 0; i < chainLength; i++) {
             try {
-                currentHash = Des.cipherPassword(plainText, new String(currentKey));
+                currentHash = des.cipherPassword(plainText, new String(currentKey));
             } catch (Exception e) {
                 logger.error("Error while ciphering password", e);
                 return;
@@ -46,7 +51,7 @@ public class RainbowTable {
 
             cipherChain.append(" ----hash----> ").append(HashLoggerUtil.getHashSubstitute(currentHash));
             currentReductionIndex = i + 1;
-            currentKey = ReductionFunction.reduceHash(currentHash, currentReductionIndex).getBytes();
+            currentKey = reductionFunction.reduceHash(currentHash, currentReductionIndex).getBytes();
             if (i < chainLength - 1) {
                 cipherChain.append(" ----reduction ").append(currentReductionIndex).append("----> ").append(new String(currentKey));
             }
@@ -87,7 +92,7 @@ public class RainbowTable {
                     for (int j = 0; j < chainLength + 1; j++) {
 
                         try {
-                            currentChainHash = Des.cipherPassword(plainText, new String(currentKey));
+                            currentChainHash = des.cipherPassword(plainText, new String(currentKey));
                         } catch (Exception e) {
                             logger.error("Error while ciphering password", e);
                             return;
@@ -97,19 +102,19 @@ public class RainbowTable {
                             return;
                         }
                         currentReductionIndex = j + 1;
-                        currentKey = ReductionFunction.reduceHash(currentHash, currentReductionIndex).getBytes();
+                        currentKey = reductionFunction.reduceHash(currentHash, currentReductionIndex).getBytes();
                     }
                     LoggerUtil.log(false, "Key found in chain but did not match the cipher... checking next chain");
                 }
             }
             LoggerUtil.log(false, "Key not found in the current chains");
             currentReductionIndex = chainLength - i - 1;
-            currentKey = ReductionFunction.reduceHash(currentHash, currentReductionIndex).getBytes();
+            currentKey = reductionFunction.reduceHash(currentHash, currentReductionIndex).getBytes();
 
             cipherChain.append(" ----reduction ").append(currentReductionIndex).append("----> ").append(new String(currentKey));
 
             try {
-                currentHash = Des.cipherPassword(plainText, new String(currentKey));
+                currentHash = des.cipherPassword(plainText, new String(currentKey));
             } catch (Exception e) {
                 logger.error("Error while ciphering password", e);
                 return;

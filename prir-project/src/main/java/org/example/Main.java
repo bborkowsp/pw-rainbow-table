@@ -14,8 +14,8 @@ import org.apache.commons.cli.*;
 public class Main {
 
     private static final String FILE_PATH = "src/main/resources/test.txt";
-    private static final String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
-    private static final Integer CHAIN_LENGTH = 2;
+    public static final String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
+    private static final Integer CHAIN_LENGTH = 10;
     private static final String KEY = "michelle";
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
@@ -29,11 +29,13 @@ public class Main {
         parseArguments(args);
 
         LoggerUtil.log(true, "Starting...");
-
-        byte[] cipher = Des.getCipher(PLAIN_TEXT, KEY);
+        
+        Des des = new Des();
+        ReductionFunction reductionFunction = new ReductionFunction();
+        byte[] cipher = des.getCipher(PLAIN_TEXT, KEY);
 
         LoggerUtil.log(false, "Ciphered " + PLAIN_TEXT + " with key " + KEY + " is equal to " + HashLoggerUtil.getHashSubstitute(cipher));
-        LoggerUtil.log(false, "Reduction function for the returned cipher is " + ReductionFunction.reduceHash(cipher, 1));
+        LoggerUtil.log(false, "Reduction function for the returned cipher is " + reductionFunction.reduceHash(cipher, 1));
 
         RainbowTable rainbowTable;
 
@@ -47,7 +49,7 @@ public class Main {
             LoggerUtil.log(true, "Loaded " + commonlyUsedPasswords.size() + " passwords");
 
             LoggerUtil.log(true, "Initializing rainbow table structure...");
-            rainbowTable = new RainbowTable(PLAIN_TEXT, CHAIN_LENGTH, commonlyUsedPasswords.size());
+            rainbowTable = new RainbowTable(PLAIN_TEXT, CHAIN_LENGTH, commonlyUsedPasswords.size(), des, reductionFunction);
 
             LoggerUtil.log(true, "Generating chains in " + (PARALLEL_MODE ? "parallel" : "sequential") + " mode...");
             if (PARALLEL_MODE) {
@@ -120,6 +122,7 @@ public class Main {
         Options options = new Options();
         options.addOption("s", "sequential", false, "sequential mode");
         options.addOption("p", "parallel", false, "parallel mode");
+        options.addOption("d", "debug", false, "debug mode");
 
         Option inputOption = new Option("i", "input", true, "input path to load the rainbow tables");
         inputOption.setRequired(false);
