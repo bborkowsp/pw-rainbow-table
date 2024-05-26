@@ -15,7 +15,7 @@ public class Main {
     private static final String FILE_PATH = "src/main/resources/test.txt";
     public static final String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
     public static Integer CHAIN_LENGTH;
-    private static final String KEY = "michelle";
+    private static final String KEY = "punisher";
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     private static Boolean PARALLEL_MODE = true;

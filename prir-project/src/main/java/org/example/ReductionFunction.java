@@ -7,7 +7,7 @@ public class ReductionFunction {
 
     public String reduceHash(byte[] hash, int index) {
         int sum = calculateSumOfBytesInHash(hash);
-        return mapSumToCharset(sum);
+        return mapSumToCharset(sum * index);
     }
 
     private String mapSumToCharset(int sum) {
