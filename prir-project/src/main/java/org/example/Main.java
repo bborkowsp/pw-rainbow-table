@@ -65,7 +65,7 @@ public class Main {
             }
             LoggerUtil.log(true, "Loaded " + commonlyUsedPasswords.size() + " passwords");
 
-            LoggerUtil.log(true, "Initializing rainbow table structure...");
+            LoggerUtil.log(true, "Initializing rainbow table structure (chain length is set to " + CHAIN_LENGTH + ")...");
             rainbowTable = new RainbowTable(PLAIN_TEXT, CHAIN_LENGTH, commonlyUsedPasswords.size(), des, reductionFunction);
 
             LoggerUtil.log(true, "Generating chains in " + (PARALLEL_MODE ? "parallel" : "sequential") + " mode...");
