@@ -1,7 +1,6 @@
 package org.example.core;
 
 public class ReductionFunction {
-
     private static final String CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
     private static final int KEY_LENGTH = 8;
 

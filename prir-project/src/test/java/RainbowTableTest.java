@@ -17,7 +17,6 @@ import static org.mockito.Mockito.when;
 
 @Getter
 public class RainbowTableTest {
-
     private Des desMock;
     private ReductionFunction reductionFunctionMock;
     private RainbowTable rainbowTable;
@@ -121,26 +120,4 @@ public class RainbowTableTest {
 
         outContent.reset();
     }
-
-    @Test
-    void abc() throws Exception {
-        Des des1 = new Des();
-//        Des des2 = new Des();
-
-        String output1 = des1.cipherPassword(getPLAIN_TEXT(), "12345678");
-        String output2 = des1.cipherPassword(getPLAIN_TEXT(), "12345678");
-
-        assertEquals(output1, output2);
-    }
-
-    @Test
-    void abc2() throws Exception {
-        String hash = "asasdasdasd";
-
-        String reduced1 = new ReductionFunction().reduceHash(hash, 1);
-        String reduced2 = new ReductionFunction().reduceHash(hash, 1);
-
-        assertEquals(reduced1, reduced2);
-    }
-
 }

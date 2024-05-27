@@ -12,7 +12,6 @@ import java.security.Security;
 import java.util.Base64;
 
 public class Des {
-
     private static final Logger logger = LoggerFactory.getLogger(Des.class);
 
     static {
@@ -44,5 +43,4 @@ public class Des {
 
         return Base64.getEncoder().encodeToString(output);
     }
-
 }

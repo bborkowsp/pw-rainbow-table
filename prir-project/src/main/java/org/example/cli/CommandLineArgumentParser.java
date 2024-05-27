@@ -5,7 +5,7 @@ import org.apache.commons.cli.*;
 import static org.example.config.AppConfig.*;
 
 public class CommandLineArgumentParser {
-
+    
     public static void parseArguments(String[] args) {
         Options options = getOptions();
         CommandLineParser parser = new DefaultParser();
@@ -38,9 +38,6 @@ public class CommandLineArgumentParser {
             }
 
             chainLength = cmd.hasOption("c");
-            if (output && !chainLength) {
-                throw new ParseException("You need to provide chain length when using -o option");
-            }
 
             if (input) TABLES_INPUT_FILE_PATH = cmd.getOptionValue("i");
             if (output) TABLES_OUTPUT_FILE_PATH = cmd.getOptionValue("o");
@@ -66,8 +63,7 @@ public class CommandLineArgumentParser {
             if (cmd.hasOption("n")) {
                 NUMBER_OF_THREADS = Integer.parseInt(cmd.getOptionValue("n"));
                 if (NUMBER_OF_THREADS > Runtime.getRuntime().availableProcessors()) {
-                    throw new ParseException("Number of threads cannot be greater than the number of available "
-                            + "processors on the current machine. Your machine has " + Runtime.getRuntime().availableProcessors() + " processors.");
+                    throw new ParseException("Number of threads cannot be greater than the number of available " + "processors on the current machine. Your machine has " + Runtime.getRuntime().availableProcessors() + " processors.");
                 }
             } else {
                 NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
@@ -114,9 +110,7 @@ public class CommandLineArgumentParser {
         textOption.setRequired(false);
         options.addOption(textOption);
 
-        Option numberOfThreadsOption = new Option("n", "number-of-threads", true,
-                "number of threads to use in the parallel mode, default is equal to max number of threads on "
-                        + "the current machine (" + Runtime.getRuntime().availableProcessors() + ")");
+        Option numberOfThreadsOption = new Option("n", "number-of-threads", true, "number of threads to use in the parallel mode, default is equal to max number of threads on " + "the current machine (" + Runtime.getRuntime().availableProcessors() + ")");
         numberOfThreadsOption.setRequired(false);
         options.addOption(numberOfThreadsOption);
 

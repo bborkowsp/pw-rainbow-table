@@ -1,7 +1,7 @@
 package org.example.config;
 
 public class AppConfig {
-    public static String PASSWORDS_INPUT_FILE_PATH = "src/main/resources/test.txt";
+    public static String PASSWORDS_INPUT_FILE_PATH = "src/main/resources/passwords-500.txt";
     public static String TABLES_INPUT_FILE_PATH;
     public static String TABLES_OUTPUT_FILE_PATH;
 

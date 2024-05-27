@@ -3,7 +3,6 @@ package org.example.utils;
 import java.util.HashMap;
 
 public class HashLoggerUtil {
-
     private static final HashMap<String, String> generatedSubstitutes = new HashMap<>();
 
     public static String getHashSubstitute(String hash) {
@@ -19,5 +18,4 @@ public class HashLoggerUtil {
     private static String generateNextSubstitute() {
         return "HASH_" + generatedSubstitutes.size();
     }
-
 }

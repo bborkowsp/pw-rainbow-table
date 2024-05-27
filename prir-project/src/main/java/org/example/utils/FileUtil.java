@@ -15,7 +15,6 @@ import static org.example.config.AppConfig.PLAIN_TEXT;
 
 
 public class FileUtil {
-
     private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
 
     public static RainbowTable readInputFile(String filePath) {
@@ -57,6 +56,7 @@ public class FileUtil {
             table = readRainbowTable(reader);
         } catch (IOException e) {
             logger.error("Error while reading file: " + filePath, e);
+            System.exit(1);
         }
         return table;
     }
@@ -101,6 +101,4 @@ public class FileUtil {
             throw new IOException("Chain length not found in the file.");
         }
     }
-
-
 }

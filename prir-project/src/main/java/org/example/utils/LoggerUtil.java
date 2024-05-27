@@ -10,5 +10,4 @@ public class LoggerUtil {
         }
         System.out.println(message);
     }
-
 }

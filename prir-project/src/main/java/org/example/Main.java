@@ -19,9 +19,7 @@ import static org.example.config.AppConfig.*;
 
 
 public class Main {
-
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
-
 
     public static void main(String[] args) {
         CommandLineArgumentParser.parseArguments(args);
