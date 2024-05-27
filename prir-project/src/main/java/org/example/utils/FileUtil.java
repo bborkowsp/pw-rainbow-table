@@ -1,6 +1,5 @@
 package org.example.utils;
 
-import org.example.Main;
 import org.example.core.RainbowTable;
 import org.example.core.ReductionFunction;
 import org.example.crypto.Des;
@@ -10,6 +9,9 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.example.config.AppConfig.CHAIN_LENGTH;
+import static org.example.config.AppConfig.PLAIN_TEXT;
 
 
 public class FileUtil {
@@ -23,7 +25,7 @@ public class FileUtil {
 
     public static void saveOutputFile(String filePath, RainbowTable rainbowTable) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            writer.write(Main.CHAIN_LENGTH.toString());
+            writer.write(CHAIN_LENGTH.toString());
             writer.newLine();
             for (String[] row : rainbowTable.getTable()) {
                 writer.write(row[0] + " " + row[1]);
@@ -51,7 +53,7 @@ public class FileUtil {
     private static List<String[]> parseInputFile(String filePath) {
         List<String[]> table = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            Main.CHAIN_LENGTH = readChainLength(reader);
+            CHAIN_LENGTH = readChainLength(reader);
             table = readRainbowTable(reader);
         } catch (IOException e) {
             logger.error("Error while reading file: " + filePath, e);
@@ -64,8 +66,8 @@ public class FileUtil {
         ReductionFunction reductionFunction = new ReductionFunction();
 
         RainbowTable rainbowTable = new RainbowTable(
-                Main.PLAIN_TEXT,
-                Main.CHAIN_LENGTH,
+                PLAIN_TEXT,
+                CHAIN_LENGTH,
                 table.size(),
                 des,
                 reductionFunction

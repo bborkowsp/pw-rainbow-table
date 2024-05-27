@@ -2,7 +2,6 @@ package org.example.core;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.example.Main;
 import org.example.crypto.Des;
 import org.example.utils.HashLoggerUtil;
 import org.example.utils.LoggerUtil;
@@ -12,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+
+import static org.example.config.AppConfig.NUMBER_OF_THREADS;
 
 @Getter
 @Setter
@@ -93,7 +94,7 @@ public class RainbowTable {
     }
 
     public void crackKeyParallel(String cipher) {
-        ExecutorService executor = Executors.newFixedThreadPool(Main.NUMBER_OF_THREADS);
+        ExecutorService executor = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
         List<Callable<String>> tasks = new ArrayList<>();
 
         for (int i = chainLength - 1; i >= 1; i--) {

@@ -1,7 +1,8 @@
 package org.example.cli;
 
 import org.apache.commons.cli.*;
-import org.example.Main;
+
+import static org.example.config.AppConfig.*;
 
 public class CommandLineArgumentParser {
 
@@ -17,7 +18,7 @@ public class CommandLineArgumentParser {
 
             debug = cmd.hasOption("d");
             if (debug) {
-                Main.DEBUG = true;
+                DEBUG = true;
             }
 
             sequential = cmd.hasOption("s");
@@ -26,7 +27,7 @@ public class CommandLineArgumentParser {
             if (sequential && parallel) {
                 throw new ParseException("Cannot run the app in both sequential and parallel mode. Please choose one.");
             } else {
-                Main.PARALLEL_MODE = !sequential;
+                PARALLEL_MODE = !sequential;
             }
 
             input = cmd.hasOption("i");
@@ -41,9 +42,9 @@ public class CommandLineArgumentParser {
                 throw new ParseException("You need to provide chain length when using -o option");
             }
 
-            if (input) Main.INPUT_FILE_PATH = cmd.getOptionValue("i");
-            if (output) Main.OUTPUT_FILE_PATH = cmd.getOptionValue("o");
-            if (chainLength) Main.CHAIN_LENGTH = Integer.parseInt(cmd.getOptionValue("c"));
+            if (input) INPUT_FILE_PATH = cmd.getOptionValue("i");
+            if (output) OUTPUT_FILE_PATH = cmd.getOptionValue("o");
+            if (chainLength) CHAIN_LENGTH = Integer.parseInt(cmd.getOptionValue("c"));
 
             key = cmd.hasOption("k");
             text = cmd.hasOption("t");
@@ -54,22 +55,22 @@ public class CommandLineArgumentParser {
             }
 
             if (key) {
-                Main.KEY = cmd.getOptionValue("k");
-                if (Main.KEY.length() != 8) {
+                KEY = cmd.getOptionValue("k");
+                if (KEY.length() != 8) {
                     throw new ParseException("Key must be 8 characters long");
                 }
             }
-            if (text) Main.PLAIN_TEXT = cmd.getOptionValue("t");
-            if (cipher) Main.CIPHER_TO_CRACK = cmd.getOptionValue("cipher");
+            if (text) PLAIN_TEXT = cmd.getOptionValue("t");
+            if (cipher) CIPHER_TO_CRACK = cmd.getOptionValue("cipher");
 
             if (cmd.hasOption("n")) {
-                Main.NUMBER_OF_THREADS = Integer.parseInt(cmd.getOptionValue("n"));
-                if (Main.NUMBER_OF_THREADS > Runtime.getRuntime().availableProcessors()) {
+                NUMBER_OF_THREADS = Integer.parseInt(cmd.getOptionValue("n"));
+                if (NUMBER_OF_THREADS > Runtime.getRuntime().availableProcessors()) {
                     throw new ParseException("Number of threads cannot be greater than the number of available "
                             + "processors on the current machine. Your machine has " + Runtime.getRuntime().availableProcessors() + " processors.");
                 }
             } else {
-                Main.NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
+                NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
             }
         } catch (ParseException e) {
             System.out.println(e.getMessage());
@@ -93,11 +94,11 @@ public class CommandLineArgumentParser {
         outputOption.setRequired(false);
         options.addOption(outputOption);
 
-        Option chainLengthOption = new Option("c", "chain-length", true, "chain length required for -o option, default is " + Main.CHAIN_LENGTH);
+        Option chainLengthOption = new Option("c", "chain-length", true, "chain length required for -o option, default is " + CHAIN_LENGTH);
         chainLengthOption.setRequired(false);
         options.addOption(chainLengthOption);
 
-        Option keyOption = new Option("k", "key", true, "key used to test the rainbow table, default is \"" + Main.KEY + "\"");
+        Option keyOption = new Option("k", "key", true, "key used to test the rainbow table, default is \"" + KEY + "\"");
         keyOption.setRequired(false);
         options.addOption(keyOption);
 
@@ -105,7 +106,7 @@ public class CommandLineArgumentParser {
         cipherOption.setRequired(false);
         options.addOption(cipherOption);
 
-        Option textOption = new Option("t", "text", true, "plain text to cipher, default is \"" + Main.PLAIN_TEXT + "\"");
+        Option textOption = new Option("t", "text", true, "plain text to cipher, default is \"" + PLAIN_TEXT + "\"");
         textOption.setRequired(false);
         options.addOption(textOption);
 

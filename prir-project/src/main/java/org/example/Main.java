@@ -15,25 +15,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.example.config.AppConfig.*;
+
 
 public class Main {
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
-
-    private static final String FILE_PATH = "src/main/resources/test.txt";
-    public static String INPUT_FILE_PATH;
-    public static String OUTPUT_FILE_PATH;
-
-    public static String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
-    public static Integer CHAIN_LENGTH = 100;
-    public static Integer NUMBER_OF_THREADS;
-
-    public static String KEY = "sebastia";
-    public static String CIPHER_TO_CRACK = null;
-
-    public static Boolean PARALLEL_MODE = true;
-    private static final Boolean RUN_CRACKING_ONLY_IN_SEQUENTIAL_MODE = false;
-    public static Boolean DEBUG = false;
 
 
     public static void main(String[] args) {
