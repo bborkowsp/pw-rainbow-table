@@ -1,6 +1,5 @@
 package org.example;
 
-import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,23 +11,26 @@ import java.util.concurrent.TimeUnit;
 
 public class Main {
 
-    private static final String FILE_PATH = "src/main/resources/test.txt";
-    public static String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
-    public static Integer CHAIN_LENGTH = 100;
-    private static String KEY = "O88Yh6lX";
-    private static String CIPHER_TO_CRACK = null;
-    public static Integer NUMBER_OF_THREADS;
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    private static Boolean PARALLEL_MODE = true;
+    private static final String FILE_PATH = "src/main/resources/test.txt";
+    public static String INPUT_FILE_PATH;
+    public static String OUTPUT_FILE_PATH;
+
+    public static String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
+    public static Integer CHAIN_LENGTH = 100;
+    public static Integer NUMBER_OF_THREADS;
+
+    public static String KEY = "O88Yh6lX";
+    public static String CIPHER_TO_CRACK = null;
+
+    public static Boolean PARALLEL_MODE = true;
     private static final Boolean RUN_CRACKING_ONLY_IN_SEQUENTIAL_MODE = false;
-    private static String INPUT_FILE_PATH;
-    private static String OUTPUT_FILE_PATH;
     public static Boolean DEBUG = false;
 
 
     public static void main(String[] args) {
-        parseArguments(args);
+        CommandLineArgumentParser.parseArguments(args);
 
         LoggerUtil.log(true, "Starting...");
         if (PARALLEL_MODE) {
@@ -105,118 +107,6 @@ public class Main {
         LoggerUtil.log(true, "Cracking has been completed in " + (crackInParallelMode ? "parallel" : "sequential") + " mode in " + (crackingEndTime - crackingStartTime) + " ms");
     }
 
-    public static void parseArguments(String[] args) {
-        Options options = getOptions();
-        CommandLineParser parser = new DefaultParser();
-        HelpFormatter formatter = new HelpFormatter();
-        CommandLine cmd;
-        boolean debug, sequential, parallel, input, output, chainLength, key, text, cipher;
-
-        try {
-            cmd = parser.parse(options, args);
-
-            debug = cmd.hasOption("d");
-            if (debug) {
-                DEBUG = true;
-            }
-
-            sequential = cmd.hasOption("s");
-            parallel = cmd.hasOption("p");
-
-            if (sequential && parallel) {
-                throw new ParseException("Cannot run the app in both sequential and parallel mode. Please choose one.");
-            } else {
-                PARALLEL_MODE = !sequential;
-            }
-
-            input = cmd.hasOption("i");
-            output = cmd.hasOption("o");
-
-            if (input && output) {
-                throw new ParseException("Cannot provide both input and output file paths. Please choose one.");
-            }
-
-            chainLength = cmd.hasOption("c");
-            if (output && !chainLength) {
-                throw new ParseException("You need to provide chain length when using -o option");
-            }
-
-            if (input) INPUT_FILE_PATH = cmd.getOptionValue("i");
-            if (output) OUTPUT_FILE_PATH = cmd.getOptionValue("o");
-            if (chainLength) CHAIN_LENGTH = Integer.parseInt(cmd.getOptionValue("c"));
-
-            key = cmd.hasOption("k");
-            text = cmd.hasOption("t");
-            cipher = cmd.hasOption("cipher");
-
-            if ((key || text) && cipher) {
-                throw new ParseException("Cannot provide both key (or text) and cipher to crack. Please choose one.");
-            }
-
-            if (key) {
-                KEY = cmd.getOptionValue("k");
-                if (KEY.length() != 8) {
-                    throw new ParseException("Key must be 8 characters long");
-                }
-            }
-            if (text) PLAIN_TEXT = cmd.getOptionValue("t");
-            if (cipher) CIPHER_TO_CRACK = cmd.getOptionValue("cipher");
-
-            if (cmd.hasOption("n")) {
-                NUMBER_OF_THREADS = Integer.parseInt(cmd.getOptionValue("n"));
-                if (NUMBER_OF_THREADS > Runtime.getRuntime().availableProcessors()) {
-                    throw new ParseException("Number of threads cannot be greater than the number of available "
-                            + "processors on the current machine");
-                }
-            } else {
-                NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
-            }
-        } catch (ParseException e) {
-            System.out.println(e.getMessage());
-            formatter.printHelp("main application", options);
-
-            System.exit(1);
-        }
-    }
-
-    private static Options getOptions() {
-        Options options = new Options();
-        options.addOption("s", "sequential", false, "sequential mode");
-        options.addOption("p", "parallel", false, "parallel mode");
-        options.addOption("d", "debug", false, "debug mode");
-
-        Option inputOption = new Option("i", "input", true, "input path to load the rainbow table");
-        inputOption.setRequired(false);
-        options.addOption(inputOption);
-
-        Option outputOption = new Option("o", "output", true, "output path to store the rainbow table (requires -c option)");
-        outputOption.setRequired(false);
-        options.addOption(outputOption);
-
-        Option chainLengthOption = new Option("c", "chain-length", true, "chain length required for -o option, default is " + CHAIN_LENGTH);
-        chainLengthOption.setRequired(false);
-        options.addOption(chainLengthOption);
-
-        Option keyOption = new Option("k", "key", true, "key used to test the rainbow table, default is \"" + KEY + "\"");
-        keyOption.setRequired(false);
-        options.addOption(keyOption);
-
-        Option cipherOption = new Option("cipher", true, "cipher used to test the rainbow table, by default a key is used instead");
-        cipherOption.setRequired(false);
-        options.addOption(cipherOption);
-
-        Option textOption = new Option("t", "text", true, "plain text to cipher, default is \"" + PLAIN_TEXT + "\"");
-        textOption.setRequired(false);
-        options.addOption(textOption);
-
-        Option numberOfThreadsOption = new Option("n", "number-of-threads", true,
-                "number of threads to use in the parallel mode, default is equal to max number of threads on "
-                        + "the current machine (" + Runtime.getRuntime().availableProcessors() + ")");
-        numberOfThreadsOption.setRequired(false);
-        options.addOption(numberOfThreadsOption);
-
-        return options;
-    }
 
     private static void runParallel(RainbowTable rainbowTable, List<String> commonlyUsedPasswords) {
         ExecutorService executor = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
