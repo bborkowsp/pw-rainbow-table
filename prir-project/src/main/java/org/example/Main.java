@@ -52,13 +52,17 @@ public class Main {
 
         RainbowTable rainbowTable;
 
-        if (INPUT_FILE_PATH != null) {
-            LoggerUtil.log(true, "Loading rainbow table from file at " + INPUT_FILE_PATH);
-            rainbowTable = FileUtil.readInputFile(INPUT_FILE_PATH);
+        if (TABLES_INPUT_FILE_PATH != null) {
+            LoggerUtil.log(true, "Loading rainbow table from file at " + TABLES_INPUT_FILE_PATH);
+            rainbowTable = FileUtil.readInputFile(TABLES_INPUT_FILE_PATH);
             LoggerUtil.log(true, "Rainbow table has been successfully loaded");
         } else {
             LoggerUtil.log(true, "Loading commonly used passwords...");
-            List<String> commonlyUsedPasswords = FileUtil.getCommonlyUsedPasswords(FILE_PATH);
+            List<String> commonlyUsedPasswords = FileUtil.getCommonlyUsedPasswords(PASSWORDS_INPUT_FILE_PATH);
+            if (commonlyUsedPasswords.isEmpty()) {
+                logger.error("No commonly used passwords found in the file: " + PASSWORDS_INPUT_FILE_PATH);
+                System.exit(1);
+            }
             LoggerUtil.log(true, "Loaded " + commonlyUsedPasswords.size() + " passwords");
 
             LoggerUtil.log(true, "Initializing rainbow table structure...");
@@ -75,9 +79,9 @@ public class Main {
 
             LoggerUtil.log(true, "Chains have been generated!");
 
-            if (OUTPUT_FILE_PATH != null) {
-                LoggerUtil.log(true, "Saving rainbow table to file at " + OUTPUT_FILE_PATH);
-                FileUtil.saveOutputFile(OUTPUT_FILE_PATH, rainbowTable);
+            if (TABLES_OUTPUT_FILE_PATH != null) {
+                LoggerUtil.log(true, "Saving rainbow table to file at " + TABLES_OUTPUT_FILE_PATH);
+                FileUtil.saveOutputFile(TABLES_OUTPUT_FILE_PATH, rainbowTable);
                 LoggerUtil.log(true, "Rainbow table has been successfully saved");
             }
         }

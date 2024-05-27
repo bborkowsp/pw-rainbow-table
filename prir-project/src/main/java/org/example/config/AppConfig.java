@@ -1,9 +1,9 @@
 package org.example.config;
 
 public class AppConfig {
-    public static final String FILE_PATH = "src/main/resources/test.txt";
-    public static String INPUT_FILE_PATH;
-    public static String OUTPUT_FILE_PATH;
+    public static String PASSWORDS_INPUT_FILE_PATH = "src/main/resources/test.txt";
+    public static String TABLES_INPUT_FILE_PATH;
+    public static String TABLES_OUTPUT_FILE_PATH;
 
     public static String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
     public static Integer CHAIN_LENGTH = 100;

@@ -42,8 +42,8 @@ public class CommandLineArgumentParser {
                 throw new ParseException("You need to provide chain length when using -o option");
             }
 
-            if (input) INPUT_FILE_PATH = cmd.getOptionValue("i");
-            if (output) OUTPUT_FILE_PATH = cmd.getOptionValue("o");
+            if (input) TABLES_INPUT_FILE_PATH = cmd.getOptionValue("i");
+            if (output) TABLES_OUTPUT_FILE_PATH = cmd.getOptionValue("o");
             if (chainLength) CHAIN_LENGTH = Integer.parseInt(cmd.getOptionValue("c"));
 
             key = cmd.hasOption("k");
@@ -71,6 +71,10 @@ public class CommandLineArgumentParser {
                 }
             } else {
                 NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
+            }
+
+            if (cmd.hasOption("passwords")) {
+                PASSWORDS_INPUT_FILE_PATH = cmd.getOptionValue("passwords");
             }
         } catch (ParseException e) {
             System.out.println(e.getMessage());
@@ -115,6 +119,10 @@ public class CommandLineArgumentParser {
                         + "the current machine (" + Runtime.getRuntime().availableProcessors() + ")");
         numberOfThreadsOption.setRequired(false);
         options.addOption(numberOfThreadsOption);
+
+        Option passwordsInputOption = new Option("passwords", "passwords-input", true, "input path to load the commonly used 8-characters passwords, by default a sample list of 500 passwords is used");
+        passwordsInputOption.setRequired(false);
+        options.addOption(passwordsInputOption);
 
         return options;
     }
