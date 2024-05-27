@@ -1,5 +1,5 @@
 import lombok.Getter;
-import org.example.Main;
+import org.example.config.AppConfig;
 import org.example.core.RainbowTable;
 import org.example.core.ReductionFunction;
 import org.example.crypto.Des;
@@ -24,7 +24,7 @@ public class RainbowTableTest {
     private final int CHAIN_LENGTH = 2;
     private final String[] PASSWORDS = new String[]{"password", "12345678", "87654321", "drowssap"};
     private final String[] HASHED_VALUES = new String[]{"hashed_value_1", "hashed_value_2", "hashed_value_3", "hashed_value_4"};
-    private final String PLAIN_TEXT = Main.PLAIN_TEXT;
+    private final String PLAIN_TEXT = AppConfig.PLAIN_TEXT;
 
     @BeforeEach
     public void setUp() {
