@@ -1,5 +1,12 @@
 package org.example;
 
+import org.example.cli.CommandLineArgumentParser;
+import org.example.core.RainbowTable;
+import org.example.core.ReductionFunction;
+import org.example.crypto.Des;
+import org.example.utils.FileUtil;
+import org.example.utils.HashLoggerUtil;
+import org.example.utils.LoggerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +28,7 @@ public class Main {
     public static Integer CHAIN_LENGTH = 100;
     public static Integer NUMBER_OF_THREADS;
 
-    public static String KEY = "O88Yh6lX";
+    public static String KEY = "sebastia";
     public static String CIPHER_TO_CRACK = null;
 
     public static Boolean PARALLEL_MODE = true;

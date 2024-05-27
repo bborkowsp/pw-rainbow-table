@@ -1,4 +1,6 @@
-package org.example;
+package org.example.utils;
+
+import org.example.Main;
 
 public class LoggerUtil {
 

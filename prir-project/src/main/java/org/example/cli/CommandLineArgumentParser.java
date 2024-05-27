@@ -1,6 +1,7 @@
-package org.example;
+package org.example.cli;
 
 import org.apache.commons.cli.*;
+import org.example.Main;
 
 public class CommandLineArgumentParser {
 

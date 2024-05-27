@@ -1,4 +1,4 @@
-package org.example;
+package org.example.crypto;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;

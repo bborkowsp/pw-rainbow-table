@@ -1,7 +1,11 @@
-package org.example;
+package org.example.core;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.example.Main;
+import org.example.crypto.Des;
+import org.example.utils.HashLoggerUtil;
+import org.example.utils.LoggerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

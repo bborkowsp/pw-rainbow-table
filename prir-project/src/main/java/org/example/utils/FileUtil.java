@@ -1,5 +1,9 @@
-package org.example;
+package org.example.utils;
 
+import org.example.Main;
+import org.example.core.RainbowTable;
+import org.example.core.ReductionFunction;
+import org.example.crypto.Des;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
