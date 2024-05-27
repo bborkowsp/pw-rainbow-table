@@ -17,10 +17,11 @@ public class Main {
     public static Integer CHAIN_LENGTH = 100;
     private static String KEY = "password";
     private static String CIPHER_TO_CRACK = null;
+    public static Integer NUMBER_OF_THREADS;
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     private static Boolean PARALLEL_MODE = true;
-    private static final Boolean RUN_CRACKING_ONLY_IN_SEQUENTIAL_MODE = true;
+    private static final Boolean RUN_CRACKING_ONLY_IN_SEQUENTIAL_MODE = false;
     private static String INPUT_FILE_PATH;
     private static String OUTPUT_FILE_PATH;
     public static Boolean DEBUG = false;
@@ -30,6 +31,9 @@ public class Main {
         parseArguments(args);
 
         LoggerUtil.log(true, "Starting...");
+        if (PARALLEL_MODE) {
+            LoggerUtil.log(true, "Parallel mode will run on " + NUMBER_OF_THREADS + " threads");
+        }
 
         boolean generateInParallelMode = PARALLEL_MODE;
         boolean crackInParallelMode = PARALLEL_MODE && !RUN_CRACKING_ONLY_IN_SEQUENTIAL_MODE;
@@ -158,7 +162,15 @@ public class Main {
             if (text) PLAIN_TEXT = cmd.getOptionValue("t");
             if (cipher) CIPHER_TO_CRACK = cmd.getOptionValue("cipher");
 
-
+            if (cmd.hasOption("n")) {
+                NUMBER_OF_THREADS = Integer.parseInt(cmd.getOptionValue("n"));
+                if (NUMBER_OF_THREADS > Runtime.getRuntime().availableProcessors()) {
+                    throw new ParseException("Number of threads cannot be greater than the number of available "
+                            + "processors on the current machine");
+                }
+            } else {
+                NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
+            }
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             formatter.printHelp("main application", options);
@@ -197,11 +209,17 @@ public class Main {
         textOption.setRequired(false);
         options.addOption(textOption);
 
+        Option numberOfThreadsOption = new Option("n", "number-of-threads", true,
+                "number of threads to use in the parallel mode, default is equal to max number of threads on "
+                        + "the current machine (" + Runtime.getRuntime().availableProcessors() + ")");
+        numberOfThreadsOption.setRequired(false);
+        options.addOption(numberOfThreadsOption);
+
         return options;
     }
 
     private static void runParallel(RainbowTable rainbowTable, List<String> commonlyUsedPasswords) {
-        ExecutorService executor = Executors.newFixedThreadPool(2);
+        ExecutorService executor = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
 
         for (String password : commonlyUsedPasswords) {
             executor.submit(() -> rainbowTable.generateChain(password));

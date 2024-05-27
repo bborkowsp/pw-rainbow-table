@@ -86,7 +86,7 @@ public class RainbowTable {
     }
 
     public void crackKeyParallel(String cipher) {
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        ExecutorService executor = Executors.newFixedThreadPool(Main.NUMBER_OF_THREADS);
         List<Callable<String>> tasks = new ArrayList<>();
 
         for (int i = chainLength - 1; i >= 1; i--) {
