@@ -58,7 +58,7 @@ public class Main {
 
         if (INPUT_FILE_PATH != null) {
             LoggerUtil.log(true, "Loading rainbow table from file at " + INPUT_FILE_PATH);
-            rainbowTable = FileUtil.readRainbowTable(INPUT_FILE_PATH);
+            rainbowTable = FileUtil.readInputFile(INPUT_FILE_PATH);
             LoggerUtil.log(true, "Rainbow table has been successfully loaded");
         } else {
             LoggerUtil.log(true, "Loading commonly used passwords...");
@@ -81,7 +81,7 @@ public class Main {
 
             if (OUTPUT_FILE_PATH != null) {
                 LoggerUtil.log(true, "Saving rainbow table to file at " + OUTPUT_FILE_PATH);
-                FileUtil.saveRainbowTable(OUTPUT_FILE_PATH, rainbowTable);
+                FileUtil.saveOutputFile(OUTPUT_FILE_PATH, rainbowTable);
                 LoggerUtil.log(true, "Rainbow table has been successfully saved");
             }
         }
@@ -98,7 +98,7 @@ public class Main {
         crackingEndTime = System.currentTimeMillis();
 
         if (generatingStartTime != null) {
-            LoggerUtil.log(true, "\nGenerating has been completed in " + (generateInParallelMode ? "parallel" : "sequential") + " mode in " +  (generatingEndTime - generatingStartTime) + " ms");
+            LoggerUtil.log(true, "\nGenerating has been completed in " + (generateInParallelMode ? "parallel" : "sequential") + " mode in " + (generatingEndTime - generatingStartTime) + " ms");
         } else {
             LoggerUtil.log(true, "");
         }
