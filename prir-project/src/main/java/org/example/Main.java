@@ -15,7 +15,7 @@ public class Main {
     private static final String FILE_PATH = "src/main/resources/test.txt";
     public static String PLAIN_TEXT = "000000000 000000000 000000000 000000000 000000000 000000000 1234";
     public static Integer CHAIN_LENGTH = 100;
-    private static String KEY = "password";
+    private static String KEY = "O88Yh6lX";
     private static String CIPHER_TO_CRACK = null;
     public static Integer NUMBER_OF_THREADS;
     private static final Logger logger = LoggerFactory.getLogger(Main.class);

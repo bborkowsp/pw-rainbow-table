@@ -13,16 +13,16 @@ import java.util.concurrent.*;
 @Setter
 public class RainbowTable {
     private static final Logger logger = LoggerFactory.getLogger(RainbowTable.class);
+    private static final Object lock = new Object();
     private static final int DES_KEY_LENGTH = 8;
+
     private final int chainLength;
     private final int numberOfChains;
-    private String[][] table;
     private final String plainText;
-    private int currentChainRow = -1;
-    private static final Object lock = new Object();
-
     private final Des des;
     private final ReductionFunction reductionFunction;
+    private String[][] table;
+    private int currentChainRow = -1;
 
     public RainbowTable(String plainText, int chainLength, int numberOfChains, Des des, ReductionFunction reductionFunction) {
         this.plainText = plainText;
@@ -30,29 +30,35 @@ public class RainbowTable {
         this.numberOfChains = numberOfChains;
         this.des = des;
         this.reductionFunction = reductionFunction;
-
         table = new String[numberOfChains][2];
     }
 
     public void generateChain(String startPassword) {
         LoggerUtil.log(false, "Generating rainbow table for password: " + startPassword);
 
-        if (startPassword.length() != 8)
-            startPassword = new String(adjustKeyLengthToEightBytes(startPassword.getBytes()));
+        startPassword = adjustPasswordLength(startPassword);
+        StringBuilder cipherChain = new StringBuilder("START > " + startPassword);
+        String finalHash = processChainSequence(cipherChain, startPassword);
+        if (finalHash == null) {
+            return;
+        }
+        cipherChain.append(" > END\n");
+        LoggerUtil.log(false, "Generated chain: " + cipherChain);
 
-        String currentKey = startPassword;
-        String currentHash = "";
+        updateTable(startPassword, finalHash);
+    }
+
+    private String processChainSequence(StringBuilder cipherChain, String currentKey) {
         int indexOfReductionFunctionInChainSequence;
-        StringBuilder cipherChain = new StringBuilder("START > " + currentKey);
+        String currentHash = "";
 
         for (int i = 0; i < chainLength; i++) {
             try {
                 currentHash = des.cipherPassword(plainText, currentKey);
             } catch (Exception e) {
                 logger.error("Error while ciphering password", e);
-                return;
+                return null;
             }
-
             cipherChain.append(" ----hash----> ").append(HashLoggerUtil.getHashSubstitute(currentHash));
             indexOfReductionFunctionInChainSequence = i + 1;
             currentKey = reductionFunction.reduceHash(currentHash, indexOfReductionFunctionInChainSequence);
@@ -60,10 +66,7 @@ public class RainbowTable {
                 cipherChain.append(" ----reduction ").append(indexOfReductionFunctionInChainSequence).append("----> ").append(currentKey);
             }
         }
-
-        cipherChain.append(" > END\n");
-        LoggerUtil.log(false, "Generated chain: " + cipherChain);
-        updateTable(startPassword, currentHash);
+        return currentHash;
     }
 
     private void updateTable(String startPassword, String currentHash) {
@@ -206,6 +209,13 @@ public class RainbowTable {
         }
     }
 
+    private String adjustPasswordLength(String password) {
+        if (password.length() != DES_KEY_LENGTH) {
+            password = new String(adjustKeyLengthToEightBytes(password.getBytes()));
+        }
+        return password;
+    }
+
     public static byte[] adjustKeyLengthToEightBytes(byte[] key) {
         byte[] adjustedKey = new byte[DES_KEY_LENGTH];
         for (int i = 0; i < DES_KEY_LENGTH; i++) {
@@ -213,6 +223,4 @@ public class RainbowTable {
         }
         return adjustedKey;
     }
-
-
 }
